@@ -1,6 +1,6 @@
 Change history for HTML-Parser
 
-{{$NEXT}}
+2020-08-24    3.73
   * Cleaned up this changes log.
   * Added a .mailmap file to organize contributions accurately.
   * Ensure all versions are equal and on the current version
