@@ -5,6 +5,8 @@ Change history for HTML-Parser
   * Added a .mailmap file to organize contributions accurately.
   * Ensure all versions are equal and on the current version
   * Add the .mailmap to the MANIFEST
+  * Change the META information to point to the new GH repository
+  * Add a .perltidyrc to use going forward
 
 2016-01-19     3.72
   * Avoid more clang casting warnings
