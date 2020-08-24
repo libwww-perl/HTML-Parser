@@ -7,6 +7,8 @@ Change history for HTML-Parser
   * Add the .mailmap to the MANIFEST
   * Change the META information to point to the new GH repository
   * Add a .perltidyrc to use going forward
+  * Add hctype.h and pfunc.h to the dist as static files and stop asking
+    for them to be built on the user's end.
 
 2016-01-19     3.72
   * Avoid more clang casting warnings

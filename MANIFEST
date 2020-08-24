@@ -15,6 +15,7 @@ eg/htext		Leave only the text
 eg/htextsub	        Do substitutions only on the text content
 eg/htitle               Extract document title
 hints/solaris.pl	Avoid compiler bug
+hctype.h
 hparser.c		Parser implementation
 hparser.h		Parser implementation (data structures)
 lib/HTML/Entities.pm	Encode and decode entities in strings
@@ -25,6 +26,7 @@ lib/HTML/PullParser.pm  HTML::PullParser class
 lib/HTML/TokeParser.pm	HTML::TokeParser class
 mkhctype		Generates 'hctype.h'
 mkpfunc			Generates 'pfunc.h'
+pfunc.h
 t/api_version.t         Test api_version constructor option
 t/argspec-bad.t         Test various bad argspec arguments
 t/argspec.t		Test argspec
