@@ -3,6 +3,8 @@ Change history for HTML-Parser
 {{$NEXT}}
   * Cleaned up this changes log.
   * Added a .mailmap file to organize contributions accurately.
+  * Ensure all versions are equal and on the current version
+  * Add the .mailmap to the MANIFEST
 
 2016-01-19     3.72
   * Avoid more clang casting warnings
