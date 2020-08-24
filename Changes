@@ -9,6 +9,10 @@ Change history for HTML-Parser
   * Add a .perltidyrc to use going forward
   * Add hctype.h and pfunc.h to the dist as static files and stop asking
     for them to be built on the user's end.
+  * Remove t/pod.t from userland testing
+  * Remove t/pod-coverage.t from userland testing
+  * Clean up the MANIFEST
+  * Start testing via GitHub Actions/Workflows
 
 2016-01-19     3.72
   * Avoid more clang casting warnings
