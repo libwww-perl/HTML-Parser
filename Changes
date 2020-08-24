@@ -13,6 +13,7 @@ Change history for HTML-Parser
   * Remove t/pod-coverage.t from userland testing
   * Clean up the MANIFEST
   * Start testing via GitHub Actions/Workflows
+  * Protect active parser from being freed (PR 13, RT #115034)
 
 2016-01-19     3.72
   * Avoid more clang casting warnings
