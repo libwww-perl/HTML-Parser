@@ -7,14 +7,6 @@ use warnings;
 
 use ExtUtils::MakeMaker;
 
-my %xsbuild = (
-    DEFINE => "-DMARKED_SECTION",
-    H      => [
-        "hparser.h", "hctype.h", "tokenpos.h", "pfunc.h",
-        "hparser.c", "util.c",
-    ],
-);
-
 my %WriteMakefileArgs = (
   "ABSTRACT" => "Filter HTML text through the parser",
   "AUTHOR" => "Gisle Aas <gaas\@cpan.org>",
@@ -58,7 +50,8 @@ my %WriteMakefileArgs = (
 
 %WriteMakefileArgs = (
     %WriteMakefileArgs,
-    %xsbuild,
+    DEFINE => "-DMARKED_SECTION",
+    H => [ qw(hparser.h hctype.h tokenpos.h pfunc.h hparser.c util.c) ],
 );
 
 my %FallbackPrereqs = (
