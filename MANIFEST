@@ -17,6 +17,7 @@ entities.html
 hctype.h
 hints/solaris.pl		Avoid compiler bug
 hparser.h			Parser implementation (data structures)
+hparser.c			Parser implementation
 lib/HTML/Entities.pm		Encode and decode entities in strings
 lib/HTML/Filter.pm		HTML::Filter class
 lib/HTML/HeadParser.pm		HTML::HeadParser class
@@ -82,3 +83,4 @@ t/xml-mode.t			Test parsing in XML mode
 TODO				Ideas and things still left to do
 tokenpos.h			Dynamically sized token_pos arrays
 typemap				Convert between HTML::Parser and 'struct p_state'
+util.c			Some utility functions
