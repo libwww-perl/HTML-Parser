@@ -2,7 +2,7 @@ package HTML::Parser;
 
 use strict;
 
-our $VERSION = '3.73';
+our $VERSION = '3.74';
 
 require HTML::Entities;
 
