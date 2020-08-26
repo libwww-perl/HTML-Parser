@@ -89,7 +89,7 @@ for example, would encode I<just> the C<< < >>, C<< & >>, C<< > >>, and C<< "
 
   $encoded = encode_entities($input, '<>&"');
 
-and this would only encode non-plain ascii:
+and this would only encode non-plain ASCII:
 
   $encoded = encode_entities($input, '^\n\x20-\x25\x27-\x7e');
 

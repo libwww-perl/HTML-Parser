@@ -2,6 +2,9 @@ Change history for HTML-Parser
 
 {{$NEXT}}
   * Fix the order of date and version in this change log. (Thanks, haarg)
+  * Convert to Dist::Zilla
+  * Build all prereqs from our cpanfile
+  * Fix a typo here and there
 
 3.73     2020-08-24
   * Cleaned up this changes log.
