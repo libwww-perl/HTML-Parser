@@ -6,14 +6,11 @@ use HTML::Parser ();
 use Test::More;
 
 # Verify thread safety.
-
-
 BEGIN {
     plan(skip_all => "Not configured for threads") unless $Config{useithreads};
     plan(tests    => 1);
-    use threads;
 }
-
+use threads;
 
 my $ok = 0;
 
