@@ -8,3 +8,5 @@ Makefile
 *.tar.gz
 MYMETA.*
 .build/
+HTML-Parser-*/
+
