@@ -6,7 +6,6 @@ on 'runtime' => sub {
     requires 'HTML::Tagset';
     requires 'HTTP::Headers';
     requires 'IO::File';
-    requires 'LWP::UserAgent';
     requires 'URI';
     requires 'URI::URL';
     requires 'XSLoader';
