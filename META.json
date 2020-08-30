@@ -1,5 +1,5 @@
 {
-   "abstract" : "Filter HTML text through the parser",
+   "abstract" : "HTML parser class",
    "author" : [
       "Gisle Aas <gaas@cpan.org>"
    ],
@@ -105,6 +105,10 @@
       },
       "HTML::LinkExtor" : {
          "file" : "lib/HTML/LinkExtor.pm",
+         "version" : "3.75"
+      },
+      "HTML::Parser" : {
+         "file" : "lib/HTML/Parser.pm",
          "version" : "3.75"
       },
       "HTML::PullParser" : {

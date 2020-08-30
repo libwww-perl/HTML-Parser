@@ -8,7 +8,7 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 my %WriteMakefileArgs = (
-  "ABSTRACT" => "Filter HTML text through the parser",
+  "ABSTRACT" => "HTML parser class",
   "AUTHOR" => "Gisle Aas <gaas\@cpan.org>",
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => "6.52"

@@ -3,6 +3,11 @@ Change history for HTML-Parser
 {{$NEXT}}
   * Cleanup the prereqs a bit
   * Mark HTML::Filter as deprecated as the docs point out
+  * Move Parser.pm into the lib directory with the others. This will help
+    with everything from auto version bumps after releases, to scanning for
+    prerequisites and spelling errors.
+  * Fix a few spelling errors in the POD for HTML::Parser
+  * Clean up the spacing on many examples in HTML::Parser
 
 3.74      2020-08-30
   * Fix the order of date and version in this change log. (Thanks, haarg)
