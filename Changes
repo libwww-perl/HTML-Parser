@@ -1,6 +1,8 @@
 Change history for HTML-Parser
 
 {{$NEXT}}
+
+3.75      2020-08-30
   * Cleanup the prereqs a bit
   * Mark HTML::Filter as deprecated as the docs point out
   * Move Parser.pm into the lib directory with the others. This will help
