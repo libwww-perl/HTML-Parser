@@ -32,6 +32,8 @@ jobs:
           perl-version: ${{ matrix.perl-version }}
       - name: perl -V
         run: perl -V
+      - name: Ensure old Perls have a good toolchain
+        run: cpanm ExtUtils::Manifest App::cpanminus
       - name: Install Dependencies
         run: cpanm -n --installdeps .
       - name: Run Tests

@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use utf8;
 
 use HTML::Parser ();
 use Test::More;
@@ -63,7 +64,7 @@ my @tests = (
     '<a a/=/>'             => ['START[a]', "\ta/: /"],
     '<a x="foo&nbsp;bar">' => ['START[a]', "\tx: foo\xA0bar"],
     '<a x="foo&nbspbar">'  => ['START[a]', "\tx: foo&nbspbar"],
-    '<� >'               => ['TEXT[<�]', 'TEXT[ >]'],
+    '<å >'               => ['TEXT[<å]', 'TEXT[ >]'],
     '2 < 5'                => ['TEXT[2 ]', 'TEXT[<]', 'TEXT[ 5]'],
     '2 <5> 2'              => ['TEXT[2 ]', 'TEXT[<5>]', 'TEXT[ 2]'],
     '2 <a'                 => ['TEXT[2 ]', 'TEXT[<a]'],
