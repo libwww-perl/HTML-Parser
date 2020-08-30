@@ -61,7 +61,6 @@
             "HTML::Tagset" : "0",
             "HTTP::Headers" : "0",
             "IO::File" : "0",
-            "LWP::UserAgent" : "0",
             "URI" : "0",
             "URI::URL" : "0",
             "XSLoader" : "0",
@@ -97,7 +96,8 @@
       },
       "HTML::Filter" : {
          "file" : "lib/HTML/Filter.pm",
-         "version" : "3.75"
+         "version" : "3.75",
+         "x_deprecated" : 1
       },
       "HTML::HeadParser" : {
          "file" : "lib/HTML/HeadParser.pm",
