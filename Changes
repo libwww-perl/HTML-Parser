@@ -4,7 +4,19 @@ Change history for HTML-Parser
   * Fix the order of date and version in this change log. (Thanks, haarg)
   * Convert to Dist::Zilla
   * Build all prereqs from our cpanfile
+  * Go through all test files and:
+    * perltidy
+    * Use strict/warnings
+    * Get rid of two-arg open
+    * Get rid of BAREWORD filehandles
+    * Fix the eval pattern used
+    * Only use -w where we catch $SIG{__WARN__}
+    * Fix encoding problems
+    * use utf8 where we have unicode in the source
   * Fix a typo here and there
+  * perltidy all of the example apps in eg/
+  * Add comments explaining the apps in eg/ (GH#13 Thanks, Salvatore Bonaccorso)
+  * Print out UTF-8 encoded data where sensible in eg/
 
 3.73     2020-08-24
   * Cleaned up this changes log.
