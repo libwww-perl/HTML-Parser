@@ -89,7 +89,7 @@ our @ISA = qw(HTML::Parser);
 use HTML::Entities ();
 
 use strict;
-use vars qw($DEBUG);
+our $DEBUG;
 #$DEBUG = 1;
 our $VERSION = '3.76';
 
