@@ -31,7 +31,7 @@ use strict;
 use HTML::Tagset ();
 
 # legacy (some applications grabs this hash directly)
-use vars qw(%LINK_ELEMENT);
+our %LINK_ELEMENT;
 *LINK_ELEMENT = \%HTML::Tagset::linkElements;
 
 =over 4

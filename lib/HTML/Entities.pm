@@ -137,7 +137,7 @@ modify it under the same terms as Perl itself.
 
 use strict;
 our $VERSION = '3.76';
-use vars qw(%entity2char %char2entity);
+our (%entity2char, %char2entity);
 
 require 5.004;
 require Exporter;
