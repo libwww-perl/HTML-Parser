@@ -25,7 +25,7 @@ my %WriteMakefileArgs = (
     "URI" => 0,
     "URI::URL" => 0,
     "XSLoader" => 0,
-    "strict" => 0,
+    "strict" => 0
   },
   "TEST_REQUIRES" => {
     "Config" => 0,
@@ -37,7 +37,7 @@ my %WriteMakefileArgs = (
     "Test" => 0,
     "Test::More" => 0,
     "URI" => 0,
-    "strict" => 0,
+    "strict" => 0
   },
   "VERSION" => "3.76",
   "test" => {
@@ -67,7 +67,7 @@ my %FallbackPrereqs = (
   "URI" => 0,
   "URI::URL" => 0,
   "XSLoader" => 0,
-  "strict" => 0,
+  "strict" => 0
 );
 
 unless ( eval { ExtUtils::MakeMaker->VERSION('6.63_03') } ) {
