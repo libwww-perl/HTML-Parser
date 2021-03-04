@@ -24,6 +24,9 @@ jobs:
           # - '5.16.3.1'
           - '5.14.4.1'
     steps:
+      - name: ACTIONS_ALLOW_UNSECURE_COMMANDS
+        id: ACTIONS_ALLOW_UNSECURE_COMMANDS
+        run: echo 'ACTIONS_ALLOW_UNSECURE_COMMANDS=true' >> $GITHUB_ENV
       - name: Set git to use LF
         run: |
           git config --global core.autocrlf false
