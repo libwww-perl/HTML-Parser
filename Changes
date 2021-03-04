@@ -1,7 +1,8 @@
 Change history for HTML-Parser
 
 {{$NEXT}}
-  * Add a fix for a stack confusion error on `eof`. Thanks, Matthew Horsfall.
+  * Add a fix for a stack confusion error on `eof`. (GH#21) (Matthew Horsfall
+    and Chase Whitener)
 
 3.75      2020-08-30
   * Cleanup the prereqs a bit
