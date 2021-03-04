@@ -436,7 +436,7 @@ eof(self)
             SPAGAIN;
             p_state->parsing = 0;
         }
-    PUSHs(self);
+        PUSHs(self);
 
 SV*
 strict_comment(pstate,...)
