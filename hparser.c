@@ -468,7 +468,7 @@ report_event(PSTATE* p_state,
 			if (p_state->bool_attr_val)
 			    attrval = newSVsv(p_state->bool_attr_val);
 			else
-			    attrval = newSVsv(attrname);
+			    attrval = newSV(0);
 		    }
 
 		    if (!CASE_SENSITIVE(p_state))

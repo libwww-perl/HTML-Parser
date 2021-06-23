@@ -71,7 +71,7 @@ HTML
 
     sub start {
         my ($self, $tag, $attr) = @_;
-        $attr = join("/", map "$_=$attr->{$_}", sort keys %$attr);
+        $attr = join("/", map { "$_=" . ( defined $attr->{$_} ? $attr->{$_} : '<undef>' ) }  sort keys %$attr);
         $attr = "/$attr" if length $attr;
         $OUT .= "<<$tag$attr>>|";
     }

@@ -24,7 +24,7 @@ my @result;
         my ($self, $tag, $attr) = @_;
         push @result, "START[$tag]";
         for (sort keys %$attr) {
-            push @result, "\t$_: " . $attr->{$_};
+            push @result, "\t$_: " . ( defined $attr->{$_} ? $attr->{$_} : '<undef>' );
         }
         $start++;
     }
@@ -57,10 +57,10 @@ my @result;
 }
 
 my @tests = (
-    '<a ">'                => ['START[a]', "\t\": \""],
+    '<a ">'                => ['START[a]', "\t\": <undef>"],
     '<a/>'                 => ['START[a/]',],
-    '<a />'                => ['START[a]', "\t/: /"],
-    '<a a/>'               => ['START[a]', "\ta/: a/"],
+    '<a />'                => ['START[a]', "\t/: <undef>"],
+    '<a a/>'               => ['START[a]', "\ta/: <undef>"],
     '<a a/=/>'             => ['START[a]', "\ta/: /"],
     '<a x="foo&nbsp;bar">' => ['START[a]', "\tx: foo\xA0bar"],
     '<a x="foo&nbspbar">'  => ['START[a]', "\tx: foo&nbspbar"],
@@ -73,7 +73,7 @@ my @tests = (
     "2 <a href='foo bar'> 2" =>
         ['TEXT[2 ]', 'START[a]', "\thref: foo bar", 'TEXT[ 2]'],
     '2 <a href=foo bar> 2' =>
-        ['TEXT[2 ]', 'START[a]', "\tbar: bar", "\thref: foo", 'TEXT[ 2]'],
+        ['TEXT[2 ]', 'START[a]', "\tbar: <undef>", "\thref: foo", 'TEXT[ 2]'],
     '2 <a href="foo bar"> 2' =>
         ['TEXT[2 ]', 'START[a]', "\thref: foo bar", 'TEXT[ 2]'],
     '2 <a href="foo\'bar"> 2' =>
@@ -84,7 +84,7 @@ my @tests = (
         ['TEXT[2 ]', 'START[a]', "\thref: foo\"bar", 'TEXT[ 2]'],
     '2 <a.b> 2' => ['TEXT[2 ]', 'START[a.b]', 'TEXT[ 2]'],
     '2 <a.b-12 a.b = 2 a> 2' =>
-        ['TEXT[2 ]', 'START[a.b-12]', "\ta: a", "\ta.b: 2", 'TEXT[ 2]'],
+        ['TEXT[2 ]', 'START[a.b-12]', "\ta: <undef>", "\ta.b: 2", 'TEXT[ 2]'],
     '2 <a_b> 2' => ['TEXT[2 ]', 'START[a_b]', 'TEXT[ 2]'],
     '<!ENTITY nbsp   CDATA "&#160;" -- no-break space -->' =>
         ['DECLARATION[ENTITY nbsp   CDATA "&#160;" -- no-break space --]'],

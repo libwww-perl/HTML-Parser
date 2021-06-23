@@ -62,7 +62,7 @@ $p->eof;
 
 is($TEXT, <<'EOT');
 [start_document,<undef>,,]
-[start,a,<a name=`foo bar`>,name:`foo:bar`:bar`]
+[start,a,<a name=`foo bar`>,name:`foo:bar`:<undef>]
 [end_document,<undef>,,]
 EOT
 
