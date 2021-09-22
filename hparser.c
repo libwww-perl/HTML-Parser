@@ -88,7 +88,7 @@ static const char * const argname[] = {
 /* https://meiert.com/en/blog/boolean-attributes-of-html/ */
 const static struct boolean_attribute {
     int len;
-    char* str;
+    const char* str;
 }
 boolean_attributes[] = {
     {15, "allowfullscreen"},
@@ -96,7 +96,7 @@ boolean_attributes[] = {
     {5,  "async"},
     {9,  "autofocus"},
     {8,  "autoplay"},
-    {6,  "checked"},
+    {7,  "checked"},
     {8,  "controls"},
     {7,  "default"},
     {8,  "disabled"},
@@ -500,10 +500,11 @@ report_event(PSTATE* p_state,
 		    }
 		    else { /* boolean */
 			int i;
+			int found = 0;
 			for ( i = 0; boolean_attributes[i].len; i++ ) {
 			if( attrlen == boolean_attributes[i].len ) {
-			char *attrname_s = tokens[i].beg;
-			char *t          = boolean_attributes[i].str;
+			char *attrname_s = SvPVbyte_nolen(attrname);
+			const char *t = boolean_attributes[i].str;
 			int len = attrlen;
 			while(len) {
 				if(toLOWER(*attrname_s) != *t)
@@ -517,14 +518,14 @@ report_event(PSTATE* p_state,
 					else
 						attrval = newSVsv(attrname);
 					}
-					goto BOOLEAN_ATTR_MATCH_DONE;
-				}
+					found = 1;
+			}
 			}
 			}
 			/* no matches were found, so set attr to undef */
-			attrval = newSV(0);
-			BOOLEAN_ATTR_MATCH_DONE:
-			;
+			if (!found)
+				attrval = newSV(0);
+			
 			}
 
 		    if (!CASE_SENSITIVE(p_state))
