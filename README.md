@@ -1,6 +1,6 @@
-[![Actions Status](https://github.com/libwww-perl/HTML-Parser/workflows/linux/badge.svg)](https://github.com/libwww-perl/HTML-Parser/actions)
-[![Actions Status](https://github.com/libwww-perl/HTML-Parser/workflows/macos/badge.svg)](https://github.com/libwww-perl/HTML-Parser/actions)
-[![Actions Status](https://github.com/libwww-perl/HTML-Parser/workflows/windows/badge.svg)](https://github.com/libwww-perl/HTML-Parser/actions)
+[![Actions Status](https://github.com/libwww-perl/HTML-Parser/actions/workflows/linux/badge.svg)](https://github.com/libwww-perl/HTML-Parser/actions)
+[![Actions Status](https://github.com/libwww-perl/HTML-Parser/actions/workflows/macos/badge.svg)](https://github.com/libwww-perl/HTML-Parser/actions)
+[![Actions Status](https://github.com/libwww-perl/HTML-Parser/actions/workflows/windows/badge.svg)](https://github.com/libwww-perl/HTML-Parser/actions)
 
 # NAME
 
