@@ -1,6 +1,7 @@
 Change history for HTML-Parser
 
 {{$NEXT}}
+  * Update tests to remove HTML4 specific tags (GH#25) (Jess)
 
 3.76      2021-03-04
   * Add a fix for a stack confusion error on `eof`. (GH#21) (Matthew Horsfall
