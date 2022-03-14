@@ -15,21 +15,23 @@ use HTML::Parser ();
 
 # Create parser object
 my $p = HTML::Parser->new(
-  api_version => 3,
-  start_h => [\&start, "tagname, attr"],
-  end_h   => [\&end,   "tagname"],
-  marked_sections => 1,
+    api_version     => 3,
+    start_h         => [\&start, "tagname, attr"],
+    end_h           => [\&end,   "tagname"],
+    marked_sections => 1,
 );
 
 # Parse document text chunk by chunk
 $p->parse($chunk1);
 $p->parse($chunk2);
+
 # ...
 # signal end of document
 $p->eof;
 
 # Parse directly from file
 $p->parse_file("foo.html");
+
 # or
 open(my $fh, "<:utf8", "foo.html") || die;
 $p->parse_file($fh);
@@ -144,12 +146,12 @@ to the `HTML::Parser` object:
 
     ```perl
     while (1) {
-      my $chunk = &$code_ref();
-      if (!defined($chunk) || !length($chunk)) {
-        $p->eof;
-        return $p;
-      }
-      $p->parse($chunk) || return undef;
+        my $chunk = &$code_ref();
+        if (!defined($chunk) || !length($chunk)) {
+            $p->eof;
+            return $p;
+        }
+        $p->parse($chunk) || return undef;
     }
     ```
 
@@ -869,18 +871,18 @@ $p->handler(end     => "end",     "self, tagname, text");
 $p->handler(text    => "text",    "self, text, is_cdata");
 $p->handler(process => "process", "self, token0, text");
 $p->handler(
-  comment => sub {
-    my($self, $tokens) = @_;
-    for (@$tokens) {$self->comment($_);}
-  },
-  "self, tokens"
+    comment => sub {
+        my ($self, $tokens) = @_;
+        for (@$tokens) { $self->comment($_); }
+    },
+    "self, tokens"
 );
 $p->handler(
-  declaration => sub {
-    my $self = shift;
-    $self->declaration(substr($_[0], 2, -1));
-  },
-  "self, text"
+    declaration => sub {
+        my $self = shift;
+        $self->declaration(substr($_[0], 2, -1));
+    },
+    "self, text"
 );
 ```
 
@@ -901,21 +903,23 @@ an HTML document.  We achieve this by setting up a comment handler that
 does nothing and a default handler that will print out anything else:
 
 ```perl
-use HTML::Parser;
+use HTML::Parser ();
 HTML::Parser->new(
-  default_h => [sub { print shift }, 'text'],
-  comment_h => [""],
-)->parse_file(shift || die) || die $!;
+    default_h => [sub { print shift }, 'text'],
+    comment_h => [""],
+)->parse_file(shift || die)
+    || die $!;
 ```
 
 An alternative implementation is:
 
 ```perl
-use HTML::Parser;
+use HTML::Parser ();
 HTML::Parser->new(
-  end_document_h => [sub { print shift }, 'skipped_text'],
-  comment_h      => [""],
-)->parse_file(shift || die) || die $!;
+    end_document_h => [sub { print shift }, 'skipped_text'],
+    comment_h      => [""],
+)->parse_file(shift || die)
+    || die $!;
 ```
 
 This will in most cases be much more efficient since only a single
@@ -931,15 +935,15 @@ parsing as soon as the title end tag is seen:
 use HTML::Parser ();
 
 sub start_handler {
-  return if shift ne "title";
-  my $self = shift;
-  $self->handler(text => sub { print shift }, "dtext");
-  $self->handler(
-    end  => sub {
-      shift->eof if shift eq "title";
-    },
-    "tagname,self"
-  );
+    return if shift ne "title";
+    my $self = shift;
+    $self->handler(text => sub { print shift }, "dtext");
+    $self->handler(
+        end => sub {
+            shift->eof if shift eq "title";
+        },
+        "tagname,self"
+    );
 }
 
 my $p = HTML::Parser->new(api_version => 3);
