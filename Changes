@@ -1,6 +1,8 @@
 Change history for HTML-Parser
 
 {{$NEXT}}
+
+3.77      2022-03-14
   * Update tests to remove HTML4 specific tags (GH#25) (Jess)
 
 3.76      2021-03-04
