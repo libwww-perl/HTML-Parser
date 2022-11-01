@@ -1,6 +1,8 @@
 Change history for HTML-Parser
 
 {{$NEXT}}
+
+3.80      2022-11-01
   * Fix compatibility with ancient perl by avoiding index in test (GH#33)
     (Graham Knop)
 
