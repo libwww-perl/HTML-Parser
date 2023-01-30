@@ -79,7 +79,6 @@
             "FileHandle" : "0",
             "IO::File" : "0",
             "SelectSaver" : "0",
-            "Test" : "0",
             "Test::More" : "0",
             "URI" : "0",
             "perl" : "5.008",
