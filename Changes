@@ -1,6 +1,8 @@
 Change history for HTML-Parser
 
 {{$NEXT}}
+
+3.81      2023-01-30
     - Stop depending on "Test" (GH#34) (James Raspass)
     - fix test scripts after conversion to Test::More (GH#35) (Graham Knop)
 
