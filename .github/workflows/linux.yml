@@ -2,7 +2,7 @@ name: linux
 on:
   push:
     branches:
-      - '*'
+      - 'master'
     tags-ignore:
       - '*'
   pull_request:
@@ -10,9 +10,10 @@ jobs:
   perl:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: true
       matrix:
         perl-version:
-          - '5.36'
+          - '5.38'
           # - '5.34'
           # - '5.32'
           # - '5.30'
