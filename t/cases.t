@@ -94,7 +94,7 @@ my @tests = (
     '<!-- comment <!-- not comment --> comment -->' =>
         ['COMMENT[ comment <!]', 'COMMENT[> comment ]'],
     '<!-- <a href="foo"> -->' => ['COMMENT[ <a href="foo"> ]'],
-    '<input type="checkbox" checked disabled foo>' => ['START[input]', "\tchecked: checked", "\tdisabled: disabled", "\tfoo: bar", "\ttype: checkbox" ],
+    '<input type="checkbox" checked disabled foo>' => ['START[input]', "\tchecked: checked", "\tdisabled: disabled", "\tfoo: <undef>", "\ttype: checkbox" ],
 );
 
 plan tests => @tests / 2;
