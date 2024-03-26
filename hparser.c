@@ -85,6 +85,40 @@ static const char * const argname[] = {
     /* ARG_FLAG_FLAT_ARRAY */
 };
 
+/* https://meiert.com/en/blog/boolean-attributes-of-html/ */
+const static struct boolean_attribute {
+    int len;
+    const char* str;
+}
+boolean_attributes[] = {
+    {15, "allowfullscreen"},
+    {19, "allowpaymentrequest"},
+    {5,  "async"},
+    {9,  "autofocus"},
+    {8,  "autoplay"},
+    {7,  "checked"},
+    {8,  "controls"},
+    {7,  "default"},
+    {8,  "disabled"},
+    {14, "formnovalidate"},
+    {6,  "hidden"},
+    {5,  "ismap"},
+    {9,  "itemscope"},
+    {4,  "loop"},
+    {8,  "multiple"},
+    {5,  "muted"},
+    {8,  "nomodule"},
+    {10, "novalidate"},
+    {4,  "open"},
+    {11, "playsinline"},
+    {8,  "readonly"},
+    {8,  "required"},
+    {8,  "reversed"},
+    {8,  "selected"},
+    {9,  "truespeed"},
+    {0,  0}
+};
+
 #define CASE_SENSITIVE(p_state) \
          ((p_state)->xml_mode || (p_state)->case_sensitive)
 #define STRICT_NAMES(p_state) \
@@ -438,8 +472,8 @@ report_event(PSTATE* p_state,
 		}
 
 		for (i = 1; i < num_tokens; i += 2) {
-		    SV* attrname = newSVpvn(tokens[i].beg,
-					    tokens[i].end-tokens[i].beg);
+            int attrlen = tokens[i].end-tokens[i].beg;
+		    SV* attrname = newSVpvn(tokens[i].beg, attrlen);
 		    SV* attrval;
 
 		    if (utf8)
@@ -465,11 +499,34 @@ report_event(PSTATE* p_state,
 			}
 		    }
 		    else { /* boolean */
-			if (p_state->bool_attr_val)
-			    attrval = newSVsv(p_state->bool_attr_val);
-			else
-			    attrval = newSVsv(attrname);
-		    }
+			int i;
+			int found = 0;
+			for ( i = 0; boolean_attributes[i].len; i++ ) {
+			if( attrlen == boolean_attributes[i].len ) {
+			char *attrname_s = SvPVbyte_nolen(attrname);
+			const char *t = boolean_attributes[i].str;
+			int len = attrlen;
+			while(len) {
+				if(toLOWER(*attrname_s) != *t)
+					break;
+				attrname_s++;
+				t++;
+				if(!--len) {
+					/* this is a boolean attribute */
+					if (p_state->bool_attr_val)
+						attrval = newSVsv(p_state->bool_attr_val);
+					else
+						attrval = newSVsv(attrname);
+					}
+					found = 1;
+			}
+			}
+			}
+			/* no matches were found, so set attr to undef */
+			if (!found)
+				attrval = newSV(0);
+			
+			}
 
 		    if (!CASE_SENSITIVE(p_state))
 			sv_lower(aTHX_ attrname);
