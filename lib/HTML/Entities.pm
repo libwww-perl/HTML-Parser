@@ -453,7 +453,24 @@ sub encode_entities
 	    #  [ (technically unnecessary but included for symmetry with ])
 	    #  ] (end of character class)
 	    #  \ (escape character)
-	    $chars =~ s{(\\.)|(['\[\]\\])}{ defined $1 ? $1 : '\\' . $2 }seg;
+	    $chars =~ s{
+	        # capture group 1: things to skip and keep
+	        (
+	            # any escaped character
+	            \\.
+	        |
+	            # either an actual POSIX character class or anything
+	            # similar enough to trigger a regex syntax error
+	            \[: \^? [[:lower:][:digit:]]{3,} :\]
+	        )
+	        |
+	        # capture group 2: things to be escaped
+	        (
+	            ['\[\]\\]
+	        )
+	    }{
+	        defined $1 ? $1 : '\\' . $2
+	    }xseg;
 
 	    my $code = "sub { \$_[0] =~ s'([$chars])'\$char2entity{\$1} || num_entity(\$1)'ge; }";
 	    $subst{$_[1]} = eval $code;
