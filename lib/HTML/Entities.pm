@@ -443,46 +443,46 @@ sub encode_entities
     } else {
 	$ref = \$_[0];  # modify in-place
     }
+    my $regex;
     if (defined $_[1] and length $_[1]) {
-	unless (exists $subst{$_[1]}) {
-	    # Because we can't compile regex we fake it with a cached sub
+        $regex = $subst{$_[1]};
+        unless (defined $regex) {
 	    my $chars = $_[1];
 
-	    # keep existing escapes, but also escape any unescaped special character:
-	    #  ' (regex delimiter)
-	    #  [ (technically unnecessary but included for symmetry with ])
-	    #  ] (end of character class)
-	    #  \ (escape character)
-	    $chars =~ s{
-	        # capture group 1: things to skip and keep
-	        (
-	            # any escaped character
-	            \\.
-	        |
-	            # either an actual POSIX character class or anything
-	            # similar enough to trigger a regex syntax error
-	            \[: \^? [[:lower:][:digit:]]{3,} :\]
-	        )
-	        |
-	        # capture group 2: things to be escaped
-	        (
-	            ['\[\]\\]
-	        )
-	    }{
-	        defined $1 ? $1 : '\\' . $2
-	    }xseg;
+            # keep existing escapes, but also escape any unescaped special character:
+            #  [ (technically unnecessary but included for symmetry with ])
+            #  ] (end of character class)
+            #  \ (escape character)
+            $chars =~ s{
+                # capture group 1: things to skip and keep
+                (
+                    # any escaped character
+                    \\.
+                |
+                    # either an actual POSIX character class or anything
+                    # similar enough to trigger a regex syntax error
+                    \[: \^? [[:lower:][:digit:]]{3,} :\]
+                )
+                |
+                # capture group 2: things to be escaped
+                (
+                    [\[\]\\]
+                )
+            }{
+                defined $1 ? $1 : '\\' . $2
+            }xseg;
 
-	    my $code = "sub { \$_[0] =~ s'([$chars])'\$char2entity{\$1} || num_entity(\$1)'ge; }";
-	    $subst{$_[1]} = eval $code;
+            $regex = eval { qr/([$chars])/ };
 	    die( $@ . " while trying to turn range: \"$_[1]\"\n "
-	      . "into code: $code\n "
+              . "into code: /([$chars])/\n "
 	    ) if $@;
+            $subst{$_[1]} = $regex;
 	}
-	&{$subst{$_[1]}}($$ref);
     } else {
 	# Encode control chars, high bit chars and '<', '&', '>', ''' and '"'
-	$$ref =~ s/([^\n\r\t !\#\$%\(-;=?-~])/$char2entity{$1} || num_entity($1)/ge;
+        $regex = qr/([^\n\r\t !\#\$%\(-;=?-~])/;
     }
+    $$ref =~ s/$regex/$char2entity{$1} || num_entity($1)/eg;
     $$ref;
 }
 
