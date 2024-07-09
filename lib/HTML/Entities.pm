@@ -447,9 +447,15 @@ sub encode_entities
 	unless (exists $subst{$_[1]}) {
 	    # Because we can't compile regex we fake it with a cached sub
 	    my $chars = $_[1];
-	    $chars =~ s,(?<!\\)([]/]),\\$1,g;
-	    $chars =~ s,(?<!\\)\\\z,\\\\,;
-	    my $code = "sub {\$_[0] =~ s/([$chars])/\$char2entity{\$1} || num_entity(\$1)/ge; }";
+
+	    # keep existing escapes, but also escape any unescaped special character:
+	    #  ' (regex delimiter)
+	    #  [ (technically unnecessary but included for symmetry with ])
+	    #  ] (end of character class)
+	    #  \ (escape character)
+	    $chars =~ s{(\\.)|(['\[\]\\])}{ defined $1 ? $1 : '\\' . $2 }seg;
+
+	    my $code = "sub { \$_[0] =~ s'([$chars])'\$char2entity{\$1} || num_entity(\$1)'ge; }";
 	    $subst{$_[1]} = eval $code;
 	    die( $@ . " while trying to turn range: \"$_[1]\"\n "
 	      . "into code: $code\n "

@@ -3,7 +3,7 @@ use warnings;
 use utf8;
 
 use HTML::Entities qw(decode_entities encode_entities encode_entities_numeric);
-use Test::More tests => 20;
+use Test::More tests => 24;
 
 my $x = "V&aring;re norske tegn b&oslash;r &#230res";
 
@@ -32,6 +32,13 @@ is(encode_entities($x, '/'),   "[24&#47;7]\\");
 is(encode_entities($x, '\\/'), "[24&#47;7]\\");
 is(encode_entities($x, '\\'),  "[24/7]&#92;");
 is(encode_entities($x, ']\\'), "[24/7&#93;&#92;");
+
+# https://github.com/libwww-perl/HTML-Parser/issues/44
+$x = '<]$a/b\c/d$';
+is(encode_entities($x, '$'), '<]&#36;a/b\\c/d&#36;');
+is(encode_entities($x, '\\\\/'), '<]$a&#47;b&#92;c&#47;d$');
+is(encode_entities($x, '\\\\/$'), '<]&#36;a&#47;b&#92;c&#47;d&#36;');
+is(encode_entities($x, '<\\\\]'), '&lt;&#93;$a/b&#92;c/d$');
 
 # See how well it does against rfc1866...
 my $ent   = '';
