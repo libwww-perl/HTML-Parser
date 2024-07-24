@@ -3,7 +3,7 @@ use warnings;
 use utf8;
 
 use HTML::Entities qw(decode_entities encode_entities encode_entities_numeric);
-use Test::More tests => 29;
+use Test::More tests => 31;
 
 my $x = "V&aring;re norske tegn b&oslash;r &#230res";
 
@@ -47,6 +47,10 @@ is(encode_entities($x, '^[:^digit:]'),        "<Våre&#49;&#50;&#51;[=]");
 is(encode_entities($x, '[:lower:][:digit:]'), "<V&aring;&#114;&#101;&#49;&#50;&#51;[=]");
 is(encode_entities($x, '=[:^ascii:]<>'),      "&lt;V&aring;re123[&#61;]");
 is(encode_entities($x, '[:Vlower:]'),         "<&#86;å&#114;&#101;123&#91;=&#93;");
+
+# escaped character classes
+is(encode_entities($x, '\d'),                 "<Våre&#49;&#50;&#51;[=]");
+is(encode_entities($x, '\d[:punct:]'),        "&lt;Våre&#49;&#50;&#51;&#91;&#61;&#93;");
 
 # See how well it does against rfc1866...
 my $ent   = '';
