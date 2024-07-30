@@ -1,6 +1,8 @@
 Change history for HTML-Parser
 
 {{$NEXT}}
+
+3.83      2024-07-30
     - fix '$\/]' in HTML::Entities::encode_entities (GH#45) (mauke)
 
 3.82      2024-03-13
