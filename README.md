@@ -353,8 +353,6 @@ Methods that can be used to get and/or set parser options are:
     `utf8_mode` enabled, but as "\\xE2\\x99\\xA5\\xE2\\x99\\xA5" when enabled.
     The later string is what you want.
 
-    This option is only available with perl-5.8 or better.
-
 - $p->xml\_mode
 - $p->xml\_mode( $bool )
 
@@ -563,9 +561,7 @@ identifier names can be used:
     was between literal start and end tags (`script`, `style`,
     `xmp`, `iframe`, `title`, `textarea` and `plaintext`).
 
-    The Unicode character set is assumed for entity decoding.  With Perl
-    version 5.6 or earlier only the Latin-1 range is supported, and
-    entities for characters outside the range 0..255 are left unchanged.
+    The Unicode character set is assumed for entity decoding.
 
     This passes undef except for `text` events.
 
@@ -831,8 +827,7 @@ Handlers for the following events can be registered:
 
 ## Unicode
 
-`HTML::Parser` can parse Unicode strings when running under
-perl-5.8 or better.  If Unicode is passed to $p->parse() then chunks
+If Unicode is passed to $p->parse() then chunks
 of Unicode will be reported to the handlers.  The offset and length
 argspecs will also report their position in terms of characters.
 
