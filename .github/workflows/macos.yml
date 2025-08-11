@@ -32,7 +32,7 @@ jobs:
           # - '5.12'
           - '5.10'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup perl
         uses: shogo82148/actions-setup-perl@v1
         with:

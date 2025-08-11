@@ -34,7 +34,7 @@ jobs:
     container:
       image: perl:${{ matrix.perl-version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
