@@ -17,7 +17,7 @@ sub tag {
 
 sub text {
     return if $inside{script} || $inside{style};
-    print encode('utf8', $_[0]);
+    print Encode::encode('utf8', $_[0]);
 }
 
 HTML::Parser->new(
