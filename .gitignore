@@ -9,4 +9,6 @@ Makefile
 MYMETA.*
 .build/
 HTML-Parser-*/
+test.html
+test_parser.pl
 
