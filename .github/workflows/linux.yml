@@ -38,7 +38,7 @@ jobs:
     container:
       image: perldocker/perl-tester:${{ matrix.perl-version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
