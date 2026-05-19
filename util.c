@@ -161,7 +161,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool expand_prefix)
 			}
 		    }
 
-		    tmp = (char*)uvuni_to_utf8((U8*)buf, num);
+		    tmp = (char*)uvchr_to_utf8((U8*)buf, num);
 		    repl = buf;
 		    repl_len = tmp - buf;
 		    repl_utf8 = 1;
