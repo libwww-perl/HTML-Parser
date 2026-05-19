@@ -88,32 +88,32 @@
    "provides" : {
       "HTML::Entities" : {
          "file" : "lib/HTML/Entities.pm",
-         "version" : "3.84"
+         "version" : "3.85"
       },
       "HTML::Filter" : {
          "file" : "lib/HTML/Filter.pm",
-         "version" : "3.84",
+         "version" : "3.85",
          "x_deprecated" : 1
       },
       "HTML::HeadParser" : {
          "file" : "lib/HTML/HeadParser.pm",
-         "version" : "3.84"
+         "version" : "3.85"
       },
       "HTML::LinkExtor" : {
          "file" : "lib/HTML/LinkExtor.pm",
-         "version" : "3.84"
+         "version" : "3.85"
       },
       "HTML::Parser" : {
          "file" : "lib/HTML/Parser.pm",
-         "version" : "3.84"
+         "version" : "3.85"
       },
       "HTML::PullParser" : {
          "file" : "lib/HTML/PullParser.pm",
-         "version" : "3.84"
+         "version" : "3.85"
       },
       "HTML::TokeParser" : {
          "file" : "lib/HTML/TokeParser.pm",
-         "version" : "3.84"
+         "version" : "3.85"
       }
    },
    "release_status" : "stable",
@@ -128,7 +128,7 @@
          "web" : "https://github.com/libwww-perl/HTML-Parser"
       }
    },
-   "version" : "3.84",
+   "version" : "3.85",
    "x_contributors" : [
       "Andy Lester <andy@petdance.com>",
       "Antonio Radici <antonio@dyne.org>",
