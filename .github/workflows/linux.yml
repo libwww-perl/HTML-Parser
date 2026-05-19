@@ -8,37 +8,48 @@ on:
       - '*'
   pull_request:
   workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   perl:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         perl-version:
+          - '5.42'
           - '5.40'
-          # - '5.38'
-          # - '5.36'
-          # - '5.34'
-          # - '5.32'
-          # - '5.30'
-          # - '5.28'
-          # - '5.26'
-          # - '5.24'
-          # - '5.22'
-          # - '5.20-buster'
-          - '5.18-buster'
-          # - '5.16-buster'
-          # - '5.14-buster'
-          # - '5.12-buster'
-          - '5.10-buster'
+          - '5.38'
+          - '5.36'
+          - '5.34'
+          - '5.32'
+          - '5.30'
+          - '5.28'
+          - '5.26'
+          - '5.24'
+          - '5.22'
+          - '5.20'
+          - '5.18'
+          - '5.16'
+          - '5.14'
+          - '5.12'
+          - '5.10'
     container:
-      image: perl:${{ matrix.perl-version }}
+      image: perldocker/perl-tester:${{ matrix.perl-version }}
     steps:
       - uses: actions/checkout@v4
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
-        run: cpanm -n --installdeps .
+        uses: perl-actions/install-with-cpm@v2
+        with:
+          cpanfile: cpanfile
+          args: "--with-configure --with-test"
+          # the perldocker/perl-tester container already runs as root and ships no sudo
+          sudo: false
+          # App::cpm v0.999.0+ requires Perl 5.24+; pin older Perls to the last compatible release.
+          version: ${{ matrix.perl-version <= '5.22' && '0.998003' || 'main' }}
       - name: Create a non-root user called "runner"
         run: adduser --disabled-password --gecos '' runner
       - name: Run Tests as non-root user "runner"
