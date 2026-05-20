@@ -85,39 +85,63 @@ static const char * const argname[] = {
     /* ARG_FLAG_FLAT_ARRAY */
 };
 
-/* https://meiert.com/en/blog/boolean-attributes-of-html/ */
-const static struct boolean_attribute {
+/* HTML boolean attributes. Matched case-insensitively per
+ * https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#boolean-attributes
+ * Includes current HTML Living Standard booleans plus a few HTML4 legacy ones
+ * still found in the wild. Sorted alphabetically. */
+#define BOOL_ATTR(s) { (int)(sizeof(s) - 1), s }
+static const struct boolean_attribute {
     int len;
     const char* str;
-}
-boolean_attributes[] = {
-    {15, "allowfullscreen"},
-    {19, "allowpaymentrequest"},
-    {5,  "async"},
-    {9,  "autofocus"},
-    {8,  "autoplay"},
-    {7,  "checked"},
-    {8,  "controls"},
-    {7,  "default"},
-    {8,  "disabled"},
-    {14, "formnovalidate"},
-    {6,  "hidden"},
-    {5,  "ismap"},
-    {9,  "itemscope"},
-    {4,  "loop"},
-    {8,  "multiple"},
-    {5,  "muted"},
-    {8,  "nomodule"},
-    {10, "novalidate"},
-    {4,  "open"},
-    {11, "playsinline"},
-    {8,  "readonly"},
-    {8,  "required"},
-    {8,  "reversed"},
-    {8,  "selected"},
-    {9,  "truespeed"},
-    {0,  0}
+} boolean_attributes[] = {
+    BOOL_ATTR("allowfullscreen"),
+    BOOL_ATTR("async"),
+    BOOL_ATTR("autofocus"),
+    BOOL_ATTR("autoplay"),
+    BOOL_ATTR("checked"),
+    BOOL_ATTR("compact"),
+    BOOL_ATTR("controls"),
+    BOOL_ATTR("default"),
+    BOOL_ATTR("defer"),
+    BOOL_ATTR("disabled"),
+    BOOL_ATTR("formnovalidate"),
+    BOOL_ATTR("hidden"),
+    BOOL_ATTR("inert"),
+    BOOL_ATTR("ismap"),
+    BOOL_ATTR("itemscope"),
+    BOOL_ATTR("loop"),
+    BOOL_ATTR("multiple"),
+    BOOL_ATTR("muted"),
+    BOOL_ATTR("nomodule"),
+    BOOL_ATTR("noresize"),
+    BOOL_ATTR("noshade"),
+    BOOL_ATTR("novalidate"),
+    BOOL_ATTR("nowrap"),
+    BOOL_ATTR("open"),
+    BOOL_ATTR("playsinline"),
+    BOOL_ATTR("readonly"),
+    BOOL_ATTR("required"),
+    BOOL_ATTR("reversed"),
+    BOOL_ATTR("selected"),
+    BOOL_ATTR("shadowrootclonable"),
+    BOOL_ATTR("shadowrootdelegatesfocus"),
+    BOOL_ATTR("shadowrootserializable"),
+    BOOL_ATTR("truespeed"),
+    { 0, 0 }
 };
+#undef BOOL_ATTR
+
+static int
+is_boolean_attribute(const char* name, int len)
+{
+    int i;
+    for (i = 0; boolean_attributes[i].len; i++) {
+	if (len == boolean_attributes[i].len &&
+	    strnEQx(name, boolean_attributes[i].str, len, 1))
+	    return 1;
+    }
+    return 0;
+}
 
 #define CASE_SENSITIVE(p_state) \
          ((p_state)->xml_mode || (p_state)->case_sensitive)
@@ -407,9 +431,14 @@ report_event(PSTATE* p_state,
 			av_push(av, prev_token);
 		    }
 		    else { /* boolean */
-			av_push(av, p_state->bool_attr_val
-				? newSVsv(p_state->bool_attr_val)
-				: newSVsv(prev_token));
+			if (p_state->strict_boolean_attributes &&
+			    !is_boolean_attribute(SvPVbyte_nolen(prev_token),
+						  (int)SvCUR(prev_token)))
+			    av_push(av, newSV(0));
+			else
+			    av_push(av, p_state->bool_attr_val
+				    ? newSVsv(p_state->bool_attr_val)
+				    : newSVsv(prev_token));
 		    }
 		}
 		arg = sv_2mortal(newRV_noinc((SV*)av));
@@ -472,7 +501,7 @@ report_event(PSTATE* p_state,
 		}
 
 		for (i = 1; i < num_tokens; i += 2) {
-            int attrlen = tokens[i].end-tokens[i].beg;
+		    int attrlen = tokens[i].end - tokens[i].beg;
 		    SV* attrname = newSVpvn(tokens[i].beg, attrlen);
 		    SV* attrval;
 
@@ -499,34 +528,14 @@ report_event(PSTATE* p_state,
 			}
 		    }
 		    else { /* boolean */
-			int i;
-			int found = 0;
-			for ( i = 0; boolean_attributes[i].len; i++ ) {
-			if( attrlen == boolean_attributes[i].len ) {
-			char *attrname_s = SvPVbyte_nolen(attrname);
-			const char *t = boolean_attributes[i].str;
-			int len = attrlen;
-			while(len) {
-				if(toLOWER(*attrname_s) != *t)
-					break;
-				attrname_s++;
-				t++;
-				if(!--len) {
-					/* this is a boolean attribute */
-					if (p_state->bool_attr_val)
-						attrval = newSVsv(p_state->bool_attr_val);
-					else
-						attrval = newSVsv(attrname);
-					}
-					found = 1;
-			}
-			}
-			}
-			/* no matches were found, so set attr to undef */
-			if (!found)
-				attrval = newSV(0);
-			
-			}
+			if (p_state->strict_boolean_attributes &&
+			    !is_boolean_attribute(SvPVbyte_nolen(attrname), attrlen))
+			    attrval = newSV(0);
+			else if (p_state->bool_attr_val)
+			    attrval = newSVsv(p_state->bool_attr_val);
+			else
+			    attrval = newSVsv(attrname);
+		    }
 
 		    if (!CASE_SENSITIVE(p_state))
 			sv_lower(aTHX_ attrname);
