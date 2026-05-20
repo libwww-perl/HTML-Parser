@@ -104,6 +104,8 @@ static const struct boolean_attribute {
     BOOL_ATTR("default"),
     BOOL_ATTR("defer"),
     BOOL_ATTR("disabled"),
+    BOOL_ATTR("disablepictureinpicture"),
+    BOOL_ATTR("disableremoteplayback"),
     BOOL_ATTR("formnovalidate"),
     BOOL_ATTR("hidden"),
     BOOL_ATTR("inert"),

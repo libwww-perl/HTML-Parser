@@ -64,7 +64,7 @@ sub parse_attrs {
     is($a->{cxntrols}, undef, 'strict: cxntrols (length-collides with controls) is undef');
     is($a->{autopxay}, undef, 'strict: autopxay (length-collides with autoplay) is undef');
     is($a->{axync},    undef, 'strict: axync (length-collides with async) is undef');
-    is($a->{foox},     undef, 'strict: foox (length-collides with loop+open length? no) is undef');
+    is($a->{foox},     undef, 'strict: foox (4 chars, length-collides with loop/open) is undef');
 }
 
 # Case-insensitive matching against the spec list
@@ -118,6 +118,8 @@ sub parse_attrs {
         default
         defer
         disabled
+        disablepictureinpicture
+        disableremoteplayback
         formnovalidate
         hidden
         inert
