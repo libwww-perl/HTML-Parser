@@ -42,7 +42,7 @@ jobs:
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
-        uses: perl-actions/install-with-cpm@v2.3
+        uses: perl-actions/install-with-cpm@v2.4
         with:
           cpanfile: cpanfile
           args: "--with-configure --with-test"
