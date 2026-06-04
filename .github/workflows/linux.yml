@@ -41,15 +41,11 @@ jobs:
       - uses: actions/checkout@v6.0.2
       - name: perl -V
         run: perl -V
-      - name: Install Dependencies
-        uses: perl-actions/install-with-cpm@v2.4
+      - uses: perl-actions/setup-cpm@v1
         with:
-          cpanfile: cpanfile
-          args: "--with-configure --with-test"
-          # the perldocker/perl-tester container already runs as root and ships no sudo
-          sudo: false
-          # App::cpm v0.999.0+ requires Perl 5.24+; pin older Perls to the last compatible release.
-          version: ${{ matrix.perl-version <= '5.22' && '0.998003' || 'main' }}
+          version: compat
+      - name: Install Dependencies
+        run: cpm install -g --cpanfile cpanfile --with-configure --with-test
       - name: Create a non-root user called "runner"
         run: adduser --disabled-password --gecos '' runner
       - name: Run Tests as non-root user "runner"
