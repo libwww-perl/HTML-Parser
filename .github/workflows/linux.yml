@@ -47,7 +47,9 @@ jobs:
       - name: Install Dependencies
         run: cpm install -g --cpanfile cpanfile --with-configure --with-test
       - name: Create a non-root user called "runner"
-        run: adduser --disabled-password --gecos '' runner
+        # use the low-level useradd: the adduser wrapper is absent from some
+        # perldocker/perl-tester images (e.g. 5.40), but useradd ships in all
+        run: useradd -m runner
       - name: Run Tests as non-root user "runner"
         run: |
           chown -R runner:runner .
