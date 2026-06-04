@@ -38,11 +38,11 @@ jobs:
     container:
       image: perldocker/perl-tester:${{ matrix.perl-version }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.2
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
-        uses: perl-actions/install-with-cpm@v2.3
+        uses: perl-actions/install-with-cpm@v2.4
         with:
           cpanfile: cpanfile
           args: "--with-configure --with-test"
