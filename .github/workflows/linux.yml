@@ -38,7 +38,7 @@ jobs:
     container:
       image: perldocker/perl-tester:${{ matrix.perl-version }}
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.0
       - name: perl -V
         run: perl -V
       - uses: perl-actions/setup-cpm@v1
