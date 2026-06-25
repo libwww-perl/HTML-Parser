@@ -175,6 +175,7 @@ dup_pstate(pTHX_ PSTATE *pstate, CLONE_PARAMS *params)
     pstate2->empty_element_tags = pstate->empty_element_tags;
     pstate2->xml_pic = pstate->xml_pic;
     pstate2->backquote = pstate->backquote;
+    pstate2->strict_boolean_attributes = pstate->strict_boolean_attributes;
 
     pstate2->bool_attr_val =
 	SvREFCNT_inc(sv_dup(pstate->bool_attr_val, params));
@@ -356,6 +357,7 @@ strict_comment(pstate,...)
         HTML::Parser::empty_element_tags = 11
         HTML::Parser::xml_pic = 12
 	HTML::Parser::backquote = 13
+	HTML::Parser::strict_boolean_attributes = 14
     PREINIT:
 	bool *attr;
     CODE:
@@ -378,6 +380,7 @@ strict_comment(pstate,...)
 	case 11: attr = &pstate->empty_element_tags;   break;
         case 12: attr = &pstate->xml_pic;              break;
 	case 13: attr = &pstate->backquote;            break;
+	case 14: attr = &pstate->strict_boolean_attributes; break;
 	default:
 	    croak("Unknown boolean attribute (%d)", (int)ix);
         }
