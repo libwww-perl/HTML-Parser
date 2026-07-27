@@ -1739,6 +1739,17 @@ parse(pTHX_
 			/* rest is considered text */
 			break;
                     }
+		    /* Unclosed script/style/title at end of document.  A browser
+		     * keeps the remaining bytes as the element's raw text and
+		     * closes it implicitly; it does not re-parse the tail looking
+		     * for markup.  Re-parsing here would expose tags that follow a
+		     * close tag broken by (e.g.) an embedded NUL, diverging from
+		     * every browser.  So report the tail as text -- respecting the
+		     * element's CDATA-ness, still recorded in p_state->is_cdata --
+		     * then emit the end event, but never re-parse it. */
+		    if (s < end)
+			report_event(p_state, E_TEXT, s, end, utf8, 0, 0, self);
+
 		    if (strEQ(p_state->literal_mode, "script") ||
 			strEQ(p_state->literal_mode, "style"))
 		    {
@@ -1753,7 +1764,8 @@ parse(pTHX_
 			p_state->pending_end_tag = p_state->literal_mode;
 		    }
 		    p_state->literal_mode = 0;
-		    s = parse_buf(aTHX_ p_state, s, end, utf8, self);
+		    p_state->is_cdata = 0;
+		    s = end;
 		    continue;
 		}
 
