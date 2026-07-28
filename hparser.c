@@ -1570,13 +1570,21 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 		if (!*l && (strNE(p_state->literal_mode, "plaintext") || p_state->closing_plaintext)) {
 		    /* matched it all */
 		    token_pos_t end_token;
+		    char *gt = end;
 		    end_token.beg = end_text + 2;
 		    end_token.end = s;
 
-		    while (isHSPACE(*s))
-			s++;
-		    if (*s == '>') {
-			s++;
+		    if (p_state->strict_end) {
+			while (isHSPACE(*s))
+			    s++;
+			if (*s == '>')
+			    gt = s;
+		    }
+		    else if (isHSPACE(*s) || *s == '>' || *s == '/') {
+			gt = skip_until_gt(s, end);
+		    }
+		    if (gt < end) {
+			s = gt + 1;
 			if (t != end_text)
 			    report_event(p_state, E_TEXT, t, end_text, utf8,
 					 0, 0, self);
