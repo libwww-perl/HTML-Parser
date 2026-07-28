@@ -19,6 +19,11 @@ Change history for HTML-Parser
     - Clear the eof flag when a handler stops the parse from inside eof(),
       so that the next document parsed by the same object is no longer
       discarded. HTML::HeadParser stops this way at the end of the head.
+    - Take only the character encoding from a <meta> inside a title that
+      is never closed. Such a <meta> is the title's text rather than an
+      element, so it no longer sets an X-Meta-Keywords, a Refresh or a
+      Set-Cookie header. The encoding is still recovered, as browsers do,
+      by prescanning the leading bytes.
 
 3.85      2026-05-19
     - Replace deprecated uvuni_to_utf8() with uvchr_to_utf8() (GH#50)
