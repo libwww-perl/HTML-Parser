@@ -393,6 +393,15 @@ honoured.
 There are currently no events associated with the marked section
 markup, but the text can be returned as C<skipped_text>.
 
+The recognised status keywords are INCLUDE, RCDATA, CDATA, IGNORE and
+TEMP.  Where a section carries more than one keyword the most
+restrictive applies, so <![INCLUDE CDATA[...]]> is handled as CDATA.
+
+A section with no keywords, written as <![[...]]>, is handled as
+INCLUDE, and so is a section whose keywords are all unrecognised.  In
+SGML an unknown status keyword is an error, but C<HTML::Parser> has no
+way to report one, so it accepts the section instead.
+
 =item $p->strict_comment
 
 =item $p->strict_comment( $bool )
