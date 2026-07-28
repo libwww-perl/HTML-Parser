@@ -1787,7 +1787,10 @@ parse(pTHX_
 		    if (!reparse_remainder)
 			break;
 
-		    report_literal_end(p_state, self);
+		    /* defer the implicit end so it follows the text */
+		    p_state->pending_end_tag = p_state->literal_mode;
+		    p_state->literal_mode = 0;
+		    p_state->is_cdata = 0;
 		    s = parse_buf(aTHX_ p_state, s, end, utf8, self);
 		    continue;
 		}

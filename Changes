@@ -34,6 +34,9 @@ Change history for HTML-Parser
       too. Only three of the seven literal elements reported one, so a
       document ending inside a textarea gave no end event at all.
       plaintext still gets none, as it has no end tag.
+    - Report the implicit end of an unclosed script or style inside a
+      marked section after the element's text too. Title already put the
+      text first there.
     - Report no end event for an unclosed title inside an element that
       ignore_elements is skipping. The implicit end escaped the filter
       at the end of the document.
