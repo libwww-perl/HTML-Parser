@@ -3,7 +3,7 @@ use warnings;
 use utf8;
 
 use HTML::Parser ();
-use Test::More tests => 14;
+use Test::More tests => 15;
 
 my $tag;
 my $text;
@@ -25,7 +25,7 @@ my $error;
 }
 
 SKIP: {
-    skip $error, 14 if $error;
+    skip $error, 15 if $error;
 
     $p->parse("<![[foo]]>");
     is($text, "foo");
@@ -128,5 +128,9 @@ EOT
 
     $p->parse("<![CDATA[foo [1]]]>");
     is($text, "foo [1]", "CDATA text ending in square bracket");
+
+    $text = "";
+    $p->parse("<![TEMP[foo]]>bar")->eof;
+    is($text, "foobar", "TEMP alone terminates the marked section");
 
 }    # SKIP

@@ -968,7 +968,8 @@ marked_section_update(PSTATE* p_state)
 			STRLEN len;
 			char *token_str = SvPV(*svp, len);
 			enum marked_section_t token;
-			if (strEQ(token_str, "include"))
+			if (strEQ(token_str, "include") ||
+			    strEQ(token_str, "temp"))
 			    token = MS_INCLUDE;
 			else if (strEQ(token_str, "rcdata"))
 			    token = MS_RCDATA;

@@ -9,6 +9,9 @@ Change history for HTML-Parser
       after the text too, where script and style used to put it first.
     - Clear marked section state at EOF, so that a later document is no
       longer parsed as if the section were still open.
+    - Recognise TEMP as a marked section status keyword, so that a section
+      opened with <![TEMP[ is closed by its terminator instead of leaving
+      the ]]> in the document text.
 
 3.85      2026-05-19
     - Replace deprecated uvuni_to_utf8() with uvchr_to_utf8() (GH#50)
