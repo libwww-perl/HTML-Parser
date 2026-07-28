@@ -1529,6 +1529,26 @@ parse_null(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 #include "pfunc.h"                   /* declares the parsefunc[] */
 #endif /* USE_PFUNC */
 
+static void
+report_literal_end(PSTATE* p_state, SV* self)
+{
+    if (strEQ(p_state->literal_mode, "script") ||
+	strEQ(p_state->literal_mode, "style"))
+    {
+	/* effectively make it an empty element */
+	token_pos_t t;
+	char dummy;
+	t.beg = p_state->literal_mode;
+	t.end = p_state->literal_mode + strlen(p_state->literal_mode);
+	report_event(p_state, E_END, &dummy, &dummy, 0, &t, 1, self);
+    }
+    else {
+	p_state->pending_end_tag = p_state->literal_mode;
+    }
+    p_state->literal_mode = 0;
+    p_state->is_cdata = 0;
+}
+
 static char*
 parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 {
@@ -1771,21 +1791,7 @@ parse(pTHX_
 		    if (!reparse_remainder && s < end)
 			report_event(p_state, E_TEXT, s, end, utf8, 0, 0, self);
 
-		    if (strEQ(p_state->literal_mode, "script") ||
-			strEQ(p_state->literal_mode, "style"))
-		    {
-			/* effectively make it an empty element */
-			token_pos_t t;
-			char dummy;
-			t.beg = p_state->literal_mode;
-			t.end = p_state->literal_mode + strlen(p_state->literal_mode);
-			report_event(p_state, E_END, &dummy, &dummy, 0, &t, 1, self);
-		    }
-		    else {
-			p_state->pending_end_tag = p_state->literal_mode;
-		    }
-		    p_state->literal_mode = 0;
-		    p_state->is_cdata = 0;
+		    report_literal_end(p_state, self);
 		    s = reparse_remainder
 			? parse_buf(aTHX_ p_state, s, end, utf8, self)
 			: end;
@@ -1820,6 +1826,14 @@ parse(pTHX_
 
 	    SvREFCNT_dec(p_state->buf);
 	    p_state->buf = 0;
+	}
+	if (p_state->literal_mode &&
+	    (strEQ(p_state->literal_mode, "script") ||
+	     strEQ(p_state->literal_mode, "style") ||
+	     strEQ(p_state->literal_mode, "title")))
+	{
+	    /* nothing was buffered, but the unclosed element still ends */
+	    report_literal_end(p_state, self);
 	}
 	if (p_state->pend_text && SvOK(p_state->pend_text))
 	    flush_pending_text(p_state, self);
