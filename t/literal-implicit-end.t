@@ -1,12 +1,12 @@
 use strict;
 use warnings;
 
-# An unclosed script, style or title with nothing after its start tag
-# must still get the implicit end event at EOF, exactly as it does when
-# trailing bytes are present.
+# Every literal element left open at EOF gets an implicit end event, with
+# or without content after its start tag. plaintext is the exception, as
+# it has no end tag at all.
 
 use HTML::Parser ();
-use Test::More tests => 6;
+use Test::More tests => 16;
 
 sub events {
     my @events;
@@ -20,19 +20,31 @@ sub events {
     join "|", @events;
 }
 
-for my $el (qw( script style title )) {
-    is(events("<$el>"), "start=$el|end=$el",
-        "empty unclosed $el still ends at EOF");
+my @literal = qw( script style title xmp iframe textarea );
+
+for my $el (@literal) {
+    is(events("<$el>"), "start=$el|end=$el", "empty unclosed $el ends at EOF");
 }
 
+for my $el (@literal) {
+    is(events("<$el>x"), "start=$el|text=x|end=$el",
+        "unclosed $el with content ends after its text");
+}
+
+is(events("<plaintext>x"), "start=plaintext|text=x",
+    "plaintext has no end tag, so it gets no implicit end");
+
 is(
-    events("<script>x"),
-    "start=script|text=x|end=script",
-    "trailing content keeps the same events"
+    events("<xmp>x<img src=y>"),
+    "start=xmp|text=x<img src=y>|end=xmp",
+    "markup after an unclosed xmp is still its text"
 );
 
-is(events("<textarea>"), "start=textarea",
-    "empty unclosed textarea keeps its old behaviour");
+is(
+    events("<textarea>x</textarea>y"),
+    "start=textarea|text=x|end=textarea|text=y",
+    "a closed textarea is unaffected"
+);
 
 {
     my @events;

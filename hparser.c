@@ -1532,9 +1532,7 @@ parse_null(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 static void
 report_literal_end(PSTATE* p_state, SV* self)
 {
-    if (strEQ(p_state->literal_mode, "script") ||
-	strEQ(p_state->literal_mode, "style"))
-    {
+    if (p_state->is_cdata) {
 	/* effectively make it an empty element */
 	token_pos_t t;
 	char dummy;
@@ -1828,11 +1826,9 @@ parse(pTHX_
 	    p_state->buf = 0;
 	}
 	if (p_state->literal_mode &&
-	    (strEQ(p_state->literal_mode, "script") ||
-	     strEQ(p_state->literal_mode, "style") ||
-	     strEQ(p_state->literal_mode, "title")))
+	    strNE(p_state->literal_mode, "plaintext"))
 	{
-	    /* nothing was buffered, but the unclosed element still ends */
+	    /* the unclosed element still ends, even with nothing buffered */
 	    report_literal_end(p_state, self);
 	}
 	if (p_state->pend_text && SvOK(p_state->pend_text))

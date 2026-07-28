@@ -30,6 +30,10 @@ Change history for HTML-Parser
     - Emit the implicit end event for an unclosed script, style or
       title even when nothing follows its start tag, so <script> at the
       end of a document ends the element just as <script>x does.
+    - Emit that implicit end for an unclosed xmp, iframe or textarea
+      too. Only three of the seven literal elements reported one, so a
+      document ending inside a textarea gave no end event at all.
+      plaintext still gets none, as it has no end tag.
     - Report no end event for an unclosed title inside an element that
       ignore_elements is skipping. The implicit end escaped the filter
       at the end of the document.
