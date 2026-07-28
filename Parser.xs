@@ -329,6 +329,7 @@ eof(self)
     PREINIT:
     PSTATE* p_state = get_pstate_hv(aTHX_ self);
     PPCODE:
+        (void)sv_2mortal(SvREFCNT_inc(SvRV(self)));
         if (p_state->parsing)
             p_state->eof = 1;
         else {
