@@ -1627,8 +1627,9 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 		    s++;
 		    if (*s == '>') {
 			s++;
-			report_event(p_state, E_TEXT, t, end_text, utf8,
-				     0, 0, self);
+			if (t != end_text)
+			    report_event(p_state, E_TEXT, t, end_text, utf8,
+					 0, 0, self);
 			report_event(p_state, E_NONE, end_text, s, utf8,
 				     0, 0, self);
 			t = s;

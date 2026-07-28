@@ -19,6 +19,9 @@ Change history for HTML-Parser
     - Clear the eof flag when a handler stops the parse from inside eof(),
       so that the next document parsed by the same object is no longer
       discarded. HTML::HeadParser stops this way at the end of the head.
+    - Report no zero-length text event at the terminator of an INCLUDE
+      marked section. One fired whenever the ]]> directly followed the
+      section start or a tag inside the section.
     - Take only the character encoding from a <meta> inside a title that
       is never closed. Such a <meta> is the title's text rather than an
       element, so it no longer sets an X-Meta-Keywords, a Refresh or a
