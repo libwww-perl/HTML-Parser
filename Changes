@@ -30,6 +30,9 @@ Change history for HTML-Parser
     - Emit the implicit end event for an unclosed script, style or
       title even when nothing follows its start tag, so <script> at the
       end of a document ends the element just as <script>x does.
+    - Report no end event for an unclosed title inside an element that
+      ignore_elements is skipping. The implicit end escaped the filter
+      at the end of the document.
     - Take only the character encoding from a <meta> inside a title that
       is never closed. Such a <meta> is the title's text rather than an
       element, so it no longer sets an X-Meta-Keywords, a Refresh or a

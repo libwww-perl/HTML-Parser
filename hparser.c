@@ -1838,6 +1838,16 @@ parse(pTHX_
 	if (p_state->pend_text && SvOK(p_state->pend_text))
 	    flush_pending_text(p_state, self);
 
+	if (p_state->pending_end_tag) {
+	    /* flush while the ignore state below still applies */
+	    token_pos_t t;
+	    char dummy;
+	    t.beg = p_state->pending_end_tag;
+	    t.end = p_state->pending_end_tag + strlen(p_state->pending_end_tag);
+	    p_state->pending_end_tag = 0;
+	    report_event(p_state, E_END, &dummy, &dummy, 0, &t, 1, self);
+	}
+
 	if (p_state->ignoring_element) {
 	    /* document not balanced */
 	    SvREFCNT_dec(p_state->ignoring_element);
