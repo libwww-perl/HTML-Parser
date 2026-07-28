@@ -1777,22 +1777,18 @@ parse(pTHX_
 		     * closes it implicitly.  It does not re-parse them looking
 		     * for markup.  Re-parsing here would expose tags that follow a
 		     * close tag broken by (e.g.) an embedded NUL, diverging from
-		     * every browser.  So report them as text - respecting the
-		     * element's CDATA-ness, still recorded in p_state->is_cdata -
-		     * then emit the end event, but never re-parse it. */
+		     * every browser. */
 #ifdef MARKED_SECTION
 		    /* A marked section terminator in these bytes is structure,
 		     * not literal text, so hand them to parse_buf. */
 		    reparse_remainder =
 			p_state->ms_stack && av_len(p_state->ms_stack) >= 0;
 #endif
-		    if (!reparse_remainder && s < end)
-			report_event(p_state, E_TEXT, s, end, utf8, 0, 0, self);
+		    if (!reparse_remainder)
+			break;
 
 		    report_literal_end(p_state, self);
-		    s = reparse_remainder
-			? parse_buf(aTHX_ p_state, s, end, utf8, self)
-			: end;
+		    s = parse_buf(aTHX_ p_state, s, end, utf8, self);
 		    continue;
 		}
 
