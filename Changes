@@ -1,11 +1,14 @@
 Change history for HTML-Parser
 
 {{$NEXT}}
-    - An unclosed literal-mode element (script, style, title) at the end of a
-      document no longer has its trailing bytes re-parsed as markup. Following
-      tags are now reported as the element's raw text, matching browser
-      behaviour; previously a close tag broken by an embedded NUL, or a plainly
-      unclosed element, could expose subsequent tags as elements.
+    - Report the remaining bytes of an unclosed literal element (script,
+      style, title) at the end of a document as the element's raw text, as
+      browsers do, instead of re-parsing them as markup. Previously a
+      close tag broken by an embedded NUL, or a plainly unclosed element,
+      could expose the following tags as elements. Report the implicit end
+      after the text too, where script and style used to put it first.
+    - Clear marked section state at EOF, so that a later document is no
+      longer parsed as if the section were still open.
 
 3.85      2026-05-19
     - Replace deprecated uvuni_to_utf8() with uvchr_to_utf8() (GH#50)

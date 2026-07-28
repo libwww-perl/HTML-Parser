@@ -1723,7 +1723,7 @@ parse(pTHX_
 	/* eof */
 	char empty[1];
 	if (p_state->buf && SvOK(p_state->buf)) {
-	    /* flush it */
+	    /* flush s..end, the buffered text not yet parsed */
 	    s = SvPV(p_state->buf, len);
 	    end = s + len;
 	    utf8 = SvUTF8(p_state->buf);
@@ -1731,6 +1731,7 @@ parse(pTHX_
 
 	    while (s < end) {
 		if (p_state->literal_mode) {
+		    int reparse_remainder = 0;
 		    if (strEQ(p_state->literal_mode, "plaintext") ||
 			strEQ(p_state->literal_mode, "xmp") ||
 			strEQ(p_state->literal_mode, "iframe") ||
@@ -1741,13 +1742,19 @@ parse(pTHX_
                     }
 		    /* Unclosed script/style/title at end of document.  A browser
 		     * keeps the remaining bytes as the element's raw text and
-		     * closes it implicitly; it does not re-parse the tail looking
+		     * closes it implicitly.  It does not re-parse them looking
 		     * for markup.  Re-parsing here would expose tags that follow a
 		     * close tag broken by (e.g.) an embedded NUL, diverging from
-		     * every browser.  So report the tail as text -- respecting the
-		     * element's CDATA-ness, still recorded in p_state->is_cdata --
+		     * every browser.  So report them as text - respecting the
+		     * element's CDATA-ness, still recorded in p_state->is_cdata -
 		     * then emit the end event, but never re-parse it. */
-		    if (s < end)
+#ifdef MARKED_SECTION
+		    /* A marked section terminator in these bytes is structure,
+		     * not literal text, so hand them to parse_buf. */
+		    reparse_remainder =
+			p_state->ms_stack && av_len(p_state->ms_stack) >= 0;
+#endif
+		    if (!reparse_remainder && s < end)
 			report_event(p_state, E_TEXT, s, end, utf8, 0, 0, self);
 
 		    if (strEQ(p_state->literal_mode, "script") ||
@@ -1765,7 +1772,9 @@ parse(pTHX_
 		    }
 		    p_state->literal_mode = 0;
 		    p_state->is_cdata = 0;
-		    s = end;
+		    s = reparse_remainder
+			? parse_buf(aTHX_ p_state, s, end, utf8, self)
+			: end;
 		    continue;
 		}
 
@@ -1816,6 +1825,12 @@ parse(pTHX_
 	p_state->start_document = 0;
 	p_state->literal_mode = 0;
 	p_state->is_cdata = 0;
+	p_state->pending_end_tag = 0;
+#ifdef MARKED_SECTION
+	if (p_state->ms_stack)
+	    av_clear(p_state->ms_stack);
+	marked_section_update(p_state);
+#endif
 	return;
     }
 
