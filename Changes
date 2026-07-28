@@ -12,6 +12,10 @@ Change history for HTML-Parser
     - Recognise TEMP as a marked section status keyword, so that a section
       opened with <![TEMP[ is closed by its terminator instead of leaving
       the ]]> in the document text.
+    - Close a marked section whose status keywords are all unrecognised, for
+      example <![FOO[...]]>, and process its content normally. Previously the
+      ]]> was not recognised as the end of the section and so appeared in the
+      document text.
 
 3.85      2026-05-19
     - Replace deprecated uvuni_to_utf8() with uvchr_to_utf8() (GH#50)

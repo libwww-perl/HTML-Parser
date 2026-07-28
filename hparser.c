@@ -985,6 +985,10 @@ marked_section_update(PSTATE* p_state)
 		}
 	    }
 	}
+	/* Treat unrecognised keywords as INCLUDE in the same way that
+	 * <![[ does. */
+	if (p_state->ms == MS_NONE && av_len(ms_stack) >= 0)
+	    p_state->ms = MS_INCLUDE;
     }
     /* printf("MS %d\n", p_state->ms); */
     p_state->is_cdata = (p_state->ms == MS_CDATA);

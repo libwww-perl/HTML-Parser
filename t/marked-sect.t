@@ -3,7 +3,7 @@ use warnings;
 use utf8;
 
 use HTML::Parser ();
-use Test::More tests => 15;
+use Test::More tests => 16;
 
 my $tag;
 my $text;
@@ -25,7 +25,7 @@ my $error;
 }
 
 SKIP: {
-    skip $error, 15 if $error;
+    skip $error, 16 if $error;
 
     $p->parse("<![[foo]]>");
     is($text, "foo");
@@ -132,5 +132,9 @@ EOT
     $text = "";
     $p->parse("<![TEMP[foo]]>bar")->eof;
     is($text, "foobar", "TEMP alone terminates the marked section");
+
+    $text = "";
+    $p->parse("<![FOO[foo]]>bar")->eof;
+    is($text, "foobar", "unrecognised status keyword terminates the section");
 
 }    # SKIP
