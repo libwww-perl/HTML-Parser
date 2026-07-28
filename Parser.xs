@@ -336,6 +336,7 @@ eof(self)
             parse(aTHX_ p_state, 0, self); /* flush */
             SPAGAIN;
             p_state->parsing = 0;
+            p_state->eof = 0;
         }
         PUSHs(self);
 

@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use HTML::Parser ();
-use Test::More tests => 6;
+use Test::More tests => 7;
 
 my $p = HTML::Parser->new(api_version => 3);
 
@@ -56,6 +56,31 @@ $p = HTML::Parser->new(api_version => 3,);
 $p->handler(start => \&title_handler, 'tagname, self');
 $p->parse("<head><title>foo</title>\n</head>");
 is($title, "foo");
+
+# We used to leave the eof flag set when the handler called ->eof during the
+# flush, so the next document parsed by the same object was discarded and
+# reported the previous document's pending end tag in place of its own events
+
+$p = HTML::Parser->new(api_version => 3);
+my @events;
+$p->handler(start => sub { push @events, "start=$_[0]" }, "tagname");
+$p->handler(end   => sub { push @events, "end=$_[0]" },   "tagname");
+$p->handler(
+    text => sub {
+        my ($self, $chunk) = @_;
+        push @events, "text=$chunk";
+        $self->eof if $chunk =~ /stop/;
+    },
+    "self, text"
+);
+
+$p->parse("<title>please stop");
+$p->eof;
+
+@events = ();
+$p->parse("<p>hi</p>");
+$p->eof;
+is_deeply(\@events, ["start=p", "text=hi", "end=p"]);
 
 sub title_handler {
     return if shift ne 'title';

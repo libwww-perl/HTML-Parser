@@ -16,6 +16,9 @@ Change history for HTML-Parser
       example <![FOO[...]]>, and process its content normally. Previously the
       ]]> was not recognised as the end of the section and so appeared in the
       document text.
+    - Clear the eof flag when a handler stops the parse from inside eof(),
+      so that the next document parsed by the same object is no longer
+      discarded. HTML::HeadParser stops this way at the end of the head.
 
 3.85      2026-05-19
     - Replace deprecated uvuni_to_utf8() with uvchr_to_utf8() (GH#50)
