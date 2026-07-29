@@ -34,7 +34,7 @@ jobs:
           # - '5.14'
     steps:
       - name: Setup perl
-        uses: shogo82148/actions-setup-perl@v1.41.1
+        uses: shogo82148/actions-setup-perl@v1.42.0
         with:
           perl-version: ${{ matrix.perl-version }}
           distribution: strawberry
@@ -42,7 +42,7 @@ jobs:
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
       - name: perl -V
         run: perl -V
       - name: Ensure old Strawberries have a good toolchain
