@@ -93,6 +93,7 @@ static const char * const argname[] = {
          ((p_state)->xml_mode || (p_state)->empty_element_tags)
 
 static void flush_pending_text(PSTATE* p_state, SV* self);
+static void report_synthetic_end(PSTATE* p_state, char *name, SV* self);
 
 /*
  * Parser functions.
@@ -182,12 +183,9 @@ report_event(PSTATE* p_state,
 #endif
 
     if (p_state->pending_end_tag && event != E_TEXT && event != E_COMMENT) {
-	token_pos_t t;
-	char dummy;
-	t.beg = p_state->pending_end_tag;
-	t.end = p_state->pending_end_tag + strlen(p_state->pending_end_tag);
+	char *name = p_state->pending_end_tag;
 	p_state->pending_end_tag = 0;
-	report_event(p_state, E_END, &dummy, &dummy, 0, &t, 1, self);
+	report_synthetic_end(p_state, name, self);
 	SPAGAIN;
     }
 
@@ -653,6 +651,17 @@ IGNORE_EVENT:
     }
 #undef CHR_DIST
     return;
+}
+
+
+static void
+report_synthetic_end(PSTATE* p_state, char *name, SV* self)
+{
+    token_pos_t t;
+    char dummy;
+    t.beg = name;
+    t.end = name + strlen(name);
+    report_event(p_state, E_END, &dummy, &dummy, 0, &t, 1, self);
 }
 
 
@@ -1534,11 +1543,7 @@ report_literal_end(PSTATE* p_state, SV* self)
 {
     if (p_state->is_cdata) {
 	/* effectively make it an empty element */
-	token_pos_t t;
-	char dummy;
-	t.beg = p_state->literal_mode;
-	t.end = p_state->literal_mode + strlen(p_state->literal_mode);
-	report_event(p_state, E_END, &dummy, &dummy, 0, &t, 1, self);
+	report_synthetic_end(p_state, p_state->literal_mode, self);
     }
     else {
 	p_state->pending_end_tag = p_state->literal_mode;
@@ -1835,12 +1840,9 @@ parse(pTHX_
 
 	if (p_state->pending_end_tag) {
 	    /* flush while the ignore state below still applies */
-	    token_pos_t t;
-	    char dummy;
-	    t.beg = p_state->pending_end_tag;
-	    t.end = p_state->pending_end_tag + strlen(p_state->pending_end_tag);
+	    char *name = p_state->pending_end_tag;
 	    p_state->pending_end_tag = 0;
-	    report_event(p_state, E_END, &dummy, &dummy, 0, &t, 1, self);
+	    report_synthetic_end(p_state, name, self);
 	}
 
 	if (p_state->ignoring_element) {
