@@ -37,6 +37,10 @@ Change history for HTML-Parser
     - Report the implicit end of an unclosed script or style inside a
       marked section after the element's text too. Title already put the
       text first there.
+    - Report the implicit end under case_sensitive with the start tag's
+      name as written. An unclosed <SCRIPT> gave end=script, an
+      unbalanced pair, and a report_tags filter naming SCRIPT missed
+      the end event entirely.
     - Report no end event for an unclosed title inside an element that
       ignore_elements is skipping. The implicit end escaped the filter
       at the end of the document.

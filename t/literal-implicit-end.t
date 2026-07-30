@@ -6,7 +6,7 @@ use warnings;
 # it has no end tag at all.
 
 use HTML::Parser ();
-use Test::More tests => 16;
+use Test::More tests => 34;
 
 sub events {
     my @events;
@@ -59,4 +59,46 @@ is(
     $p->eof;
     is(join("|", @events),
         "start=p|end=p", "object parses normally after the implicit end");
+}
+
+# Under case_sensitive the implicit end must carry the start tag's name
+# as written, not the lowercase name literal mode matches against.
+
+sub cs_events {
+    my ($html, @opts) = @_;
+    my @events;
+    my $p = HTML::Parser->new(
+        case_sensitive => 1,
+        @opts,
+        start_h => [sub { push @events, "start=$_[0]" }, "tagname"],
+        text_h  => [sub { push @events, "text=$_[0]" },  "text"],
+        end_h   => [sub { push @events, "end=$_[0]" },   "tagname"],
+    );
+    $p->parse($html);
+    $p->eof;
+    join "|", @events;
+}
+
+for my $el (@literal) {
+    my $uc = uc $el;
+    is(cs_events("<$uc>x"), "start=$uc|text=x|end=$uc",
+        "upper case $el implicit end matches its start");
+}
+
+for my $el (@literal) {
+    my $mixed = ucfirst $el;
+    is(
+        cs_events("<$mixed>x"),
+        "start=$mixed|text=x|end=$mixed",
+        "mixed case $el implicit end matches its start"
+    );
+}
+
+for my $el (@literal) {
+    my $uc = uc $el;
+    is(
+        cs_events("<$uc>x", report_tags => [$uc]),
+        "start=$uc|text=x|end=$uc",
+        "report_tags sees the $el implicit end"
+    );
 }

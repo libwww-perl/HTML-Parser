@@ -9,7 +9,7 @@ use warnings;
 # order right.
 
 use HTML::Parser ();
-use Test::More tests => 9;
+use Test::More tests => 10;
 
 my $error;
 {
@@ -36,7 +36,25 @@ sub events {
 }
 
 SKIP: {
-    skip $error, 9 if $error;
+    skip $error, 10 if $error;
+
+    {
+        my @events;
+        my $p = HTML::Parser->new(
+            start_h         => [sub { push @events, "start=$_[0]" }, "tagname"],
+            text_h          => [sub { push @events, "text=$_[0]" }, "text"],
+            end_h           => [sub { push @events, "end=$_[0]" }, "tagname"],
+            marked_sections => 1,
+            case_sensitive  => 1,
+        );
+        $p->parse("<![INCLUDE[<SCRIPT>safe]]>");
+        $p->eof;
+        is(
+            join("|", @events),
+            "start=SCRIPT|text=safe|end=SCRIPT",
+            "the deferred implicit end keeps the start tag's case"
+        );
+    }
 
     for my $el (qw( script style title )) {
         is(events("<![INCLUDE[<$el>safe"),

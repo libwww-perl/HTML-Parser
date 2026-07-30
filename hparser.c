@@ -1412,6 +1412,11 @@ parse_start(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 			if (!--len) {
 			    /* found it */
 			    p_state->literal_mode = literal_mode_elem[i].str;
+			    assert(tag_len <
+				   (int)sizeof(p_state->literal_mode_name));
+			    Copy(tokens[0].beg, p_state->literal_mode_name,
+				 tag_len, char);
+			    p_state->literal_mode_name[tag_len] = '\0';
 			    p_state->is_cdata = literal_mode_elem[i].is_cdata;
 			    /* printf("Found %s\n", p_state->literal_mode); */
 			    goto END_OF_LITERAL_SEARCH;
@@ -1543,10 +1548,10 @@ report_literal_end(PSTATE* p_state, SV* self)
 {
     if (p_state->is_cdata) {
 	/* effectively make it an empty element */
-	report_synthetic_end(p_state, p_state->literal_mode, self);
+	report_synthetic_end(p_state, p_state->literal_mode_name, self);
     }
     else {
-	p_state->pending_end_tag = p_state->literal_mode;
+	p_state->pending_end_tag = p_state->literal_mode_name;
     }
     p_state->literal_mode = 0;
     p_state->is_cdata = 0;
@@ -1793,7 +1798,7 @@ parse(pTHX_
 			break;
 
 		    /* defer the implicit end so it follows the text */
-		    p_state->pending_end_tag = p_state->literal_mode;
+		    p_state->pending_end_tag = p_state->literal_mode_name;
 		    p_state->literal_mode = 0;
 		    p_state->is_cdata = 0;
 		    s = parse_buf(aTHX_ p_state, s, end, utf8, self);
