@@ -3,7 +3,7 @@ use warnings;
 use utf8;
 
 use HTML::HeadParser ();
-use Test::More tests => 23;
+use Test::More tests => 25;
 
 {
 
@@ -253,4 +253,16 @@ for my $case (
     $p->parse("<title>Doc$meta");
     $p->eof;
     ok(!$p->header($header), "an unclosed title sets no $header");
+}
+
+# The scan reads only a title's text, unlike the browser prescan, which
+# reads the leading bytes regardless of element. A declaration inside an
+# unclosed script or style is not recovered, as both are ignored
+# wholesale.
+
+for my $el (qw( script style )) {
+    $p = HTML::HeadParser->new(H->new);
+    $p->parse(qq{<$el>x<meta charset="utf-8">});
+    $p->eof;
+    ok(!$p->header("X-Meta-Charset"), "no charset from an unclosed $el");
 }

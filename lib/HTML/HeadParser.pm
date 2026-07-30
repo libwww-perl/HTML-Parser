@@ -82,12 +82,17 @@ document, but they still find the encoding, because they prescan the
 leading bytes for a charset declaration without tracking which element
 those bytes fall inside.
 
-C<HTML::HeadParser> does the same.  The text of a title is scanned for
-a E<lt>meta> carrying a C<charset> attribute, or an C<http-equiv> of
-C<Content-Type>, and such a declaration sets its header as it would
-have done as an element.  Only the encoding is taken this way.  A
-E<lt>meta> that never became an element sets no other header, so a
-truncated document cannot introduce, say, a C<Set-Cookie>.
+C<HTML::HeadParser> recovers the encoding from a title's text only.
+The text is scanned for a E<lt>meta> carrying a C<charset> attribute,
+or an C<http-equiv> of C<Content-Type>, and such a declaration sets
+its header as it would have done as an element.  Only the encoding is
+taken this way.  A E<lt>meta> that never became an element sets no
+other header, so a truncated document cannot introduce a header such
+as C<Set-Cookie>.
+
+This scan stops short of the browser prescan.  A declaration inside
+an unclosed C<script> or C<style> is not recovered, because those
+elements are ignored wholesale.
 
 =head1 METHODS
 
