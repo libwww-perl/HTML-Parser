@@ -202,9 +202,18 @@ sub prescan_meta    # internal
             sub {
                 my ($tag, $attr) = @_;
                 return if $tag ne 'meta';
-                my $equiv = $attr->{'http-equiv'} || '';
-                $self->meta_header($attr)
-                    if $attr->{charset} || lc($equiv) eq 'content-type';
+                my $equiv = $attr->{'http-equiv'};
+                if (   defined($equiv)
+                    && lc($equiv) eq 'content-type'
+                    && defined($attr->{content}))
+                {
+                    $self->{header}
+                        ->push_header("Content-Type" => $attr->{content});
+                }
+                elsif (defined $attr->{charset}) {
+                    $self->{header}
+                        ->push_header("X-Meta-Charset" => $attr->{charset});
+                }
             },
             "tagname, attr"
         ],

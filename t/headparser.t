@@ -3,7 +3,7 @@ use warnings;
 use utf8;
 
 use HTML::HeadParser ();
-use Test::More tests => 25;
+use Test::More tests => 31;
 
 {
 
@@ -253,6 +253,32 @@ for my $case (
     $p->parse("<title>Doc$meta");
     $p->eof;
     ok(!$p->header($header), "an unclosed title sets no $header");
+}
+
+# A meta admitted to the scan by its charset attribute must still set
+# only the encoding. Its other attributes must not name a header.
+
+for my $case (
+    [
+        q{<meta charset="utf-8" http-equiv="Set-Cookie" content="sid=evil">},
+        "Set-Cookie"
+    ],
+    [
+        q{<meta charset="utf-8" http-equiv="Refresh" content="0;url=http://x/">},
+        "Refresh"
+    ],
+    [
+        q{<meta charset="utf-8" name="Keywords" content="a,b">},
+        "X-Meta-Keywords"
+    ],
+    )
+{
+    my ($meta, $header) = @$case;
+    $p = HTML::HeadParser->new(H->new);
+    $p->parse("<title>Doc$meta");
+    $p->eof;
+    ok(!$p->header($header), "an admitted meta sets no $header");
+    is($p->header("X-Meta-Charset"), "utf-8", "its charset is still taken");
 }
 
 # The scan reads only a title's text, unlike the browser prescan, which
