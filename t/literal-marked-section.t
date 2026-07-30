@@ -9,7 +9,7 @@ use warnings;
 # order right.
 
 use HTML::Parser ();
-use Test::More tests => 10;
+use Test::More tests => 16;
 
 my $error;
 {
@@ -36,7 +36,7 @@ sub events {
 }
 
 SKIP: {
-    skip $error, 10 if $error;
+    skip $error, 16 if $error;
 
     {
         my @events;
@@ -53,6 +53,30 @@ SKIP: {
             join("|", @events),
             "start=SCRIPT|text=safe|end=SCRIPT",
             "the deferred implicit end keeps the start tag's case"
+        );
+    }
+
+    # A marked section left open must not turn the remaining bytes back
+    # into markup. Only its terminator is structure; the rest stays the
+    # element's text, just as outside a section.
+    for my $el (qw( script title )) {
+        my $tail = "x</$el\0><img src=y onerror=boom>";
+        is(
+            events("<![INCLUDE[<$el>$tail"),
+            "start=$el|text=$tail|end=$el",
+            "open section: NUL-broken $el close stays text"
+        );
+
+        is(
+            events("<![INCLUDE[<$el>safe<img src=x onerror=boom>"),
+            "start=$el|text=safe<img src=x onerror=boom>|end=$el",
+            "open section: unclosed $el exposes no markup"
+        );
+
+        is(
+            events("<![INCLUDE[<$el>x]]><p>hi"),
+            "start=$el|text=x|end=$el|start=p|text=hi",
+            "closed section: markup after the terminator is parsed"
         );
     }
 

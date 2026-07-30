@@ -1773,7 +1773,6 @@ parse(pTHX_
 
 	    while (s < end) {
 		if (p_state->literal_mode) {
-		    int reparse_remainder = 0;
 		    if (strEQ(p_state->literal_mode, "plaintext") ||
 			strEQ(p_state->literal_mode, "xmp") ||
 			strEQ(p_state->literal_mode, "iframe") ||
@@ -1789,20 +1788,30 @@ parse(pTHX_
 		     * close tag broken by (e.g.) an embedded NUL, diverging from
 		     * every browser. */
 #ifdef MARKED_SECTION
-		    /* A marked section terminator in these bytes is structure,
-		     * not literal text, so hand them to parse_buf. */
-		    reparse_remainder =
-			p_state->ms_stack && av_len(p_state->ms_stack) >= 0;
+		    /* Only a marked section terminator in these bytes is
+		     * structure rather than literal text, so seek it instead
+		     * of re-parsing the remainder for markup. */
+		    if (p_state->ms_stack && av_len(p_state->ms_stack) >= 0) {
+			char *t = s;
+			while (t + 3 <= end &&
+			       !(t[0] == ']' && t[1] == ']' && t[2] == '>'))
+			    t++;
+			if (t + 3 <= end) {
+			    /* the implicit end follows the element's text */
+			    if (t != s)
+				report_event(p_state, E_TEXT, s, t, utf8,
+					     0, 0, self);
+			    report_synthetic_end(p_state,
+						 p_state->literal_mode_name,
+						 self);
+			    p_state->literal_mode = 0;
+			    p_state->is_cdata = 0;
+			    s = parse_buf(aTHX_ p_state, t, end, utf8, self);
+			    continue;
+			}
+		    }
 #endif
-		    if (!reparse_remainder)
-			break;
-
-		    /* defer the implicit end so it follows the text */
-		    p_state->pending_end_tag = p_state->literal_mode_name;
-		    p_state->literal_mode = 0;
-		    p_state->is_cdata = 0;
-		    s = parse_buf(aTHX_ p_state, s, end, utf8, self);
-		    continue;
+		    break;
 		}
 
 		if (!p_state->strict_comment && !p_state->no_dash_dash_comment_end && *s == '<') {
