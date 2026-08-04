@@ -432,6 +432,10 @@ manner that emulates MSIE's behaviour.
 The official behaviour is enabled with this attribute.  If enabled,
 only whitespace is allowed between the tagname and the final ">".
 
+This also governs the end tag of a literal element.  By default
+C<< </script foo=bar> >> closes the C<script> element, as browsers
+close it.  With C<strict_end> enabled it is part of the script text.
+
 =item $p->strict_names
 
 =item $p->strict_names( $bool )
@@ -917,6 +921,15 @@ This event is triggered when an end tag is recognized.
 Example:
 
   </A>
+
+The content of the literal elements (C<script>, C<style>, C<xmp>,
+C<iframe>, C<title>, C<textarea> and C<plaintext>) is not parsed as
+markup, so the only tag recognized there is the element's own end tag.
+If the document ends while such an element is open, the remaining
+content is reported as the element's text, followed by an implicit
+C<end> event.  C<plaintext> is the exception, as it has no end tag.
+When C<case_sensitive> is enabled the implicit end reports the tag
+name as written in the start tag.
 
 =item C<end_document>
 
