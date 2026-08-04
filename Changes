@@ -2,56 +2,35 @@ Change history for HTML-Parser
 
 {{$NEXT}}
     - Report the remaining bytes of an unclosed literal element (script,
-      style, title) at the end of a document as the element's raw text, as
-      browsers do, instead of re-parsing them as markup. Previously a
-      close tag broken by an embedded NUL, or a plainly unclosed element,
-      could expose the following tags as elements. Report the implicit end
-      after the text too, where script and style used to put it first.
-    - Clear marked section state at EOF, so that a later document is no
-      longer parsed as if the section were still open.
-    - Recognise TEMP as a marked section status keyword, so that a section
-      opened with <![TEMP[ is closed by its terminator instead of leaving
-      the ]]> in the document text.
-    - Close a marked section whose status keywords are all unrecognised, for
-      example <![FOO[...]]>, and process its content normally. Previously the
-      ]]> was not recognised as the end of the section and so appeared in the
-      document text.
-    - Clear the eof flag when a handler stops the parse from inside eof(),
-      so that the next document parsed by the same object is no longer
-      discarded. HTML::HeadParser stops this way at the end of the head.
-    - Report no zero-length text event at the terminator of an INCLUDE
-      marked section. One fired whenever the ]]> directly followed the
-      section start or a tag inside the section.
-    - Close a literal element at an end tag that carries attributes or
-      a slash, for example </script foo=bar>, as browsers do. Previously
-      the element stayed open and the following markup was reported as
-      its text where a browser renders it. Enable strict_end for the
-      old behaviour.
-    - Emit the implicit end event for an unclosed script, style or
-      title even when nothing follows its start tag, so <script> at the
-      end of a document ends the element just as <script>x does.
-    - Emit that implicit end for an unclosed xmp, iframe or textarea
-      too. Only three of the seven literal elements reported one, so a
-      document ending inside a textarea gave no end event at all.
-      plaintext still gets none, as it has no end tag.
-    - Report the implicit end of an unclosed script or style inside a
-      marked section after the element's text too. Title already put the
-      text first there.
-    - Report the implicit end under case_sensitive with the start tag's
-      name as written. An unclosed <SCRIPT> gave end=script, an
-      unbalanced pair, and a report_tags filter naming SCRIPT missed
-      the end event entirely.
-    - Report no end event for an unclosed title inside an element that
-      ignore_elements is skipping. The implicit end escaped the filter
-      at the end of the document.
+      style, title, xmp, iframe, textarea) at the end of a document as
+      the element's raw text, as browsers do, instead of re-parsing them
+      as markup. Previously a close tag broken by an embedded NUL, or a
+      plainly unclosed element, could expose the following tags as
+      elements.
+    - Fix the implicit end event of an unclosed literal element. Report
+      it after the element's text, for xmp, iframe and textarea too
+      (plaintext has no end tag and gets none), with the start tag's
+      name as written under case_sensitive, and not at all inside an
+      element that ignore_elements is skipping.
+    - Close a literal element at an end tag that carries attributes or a
+      slash, for example </script foo=bar>, as browsers do. Enable
+      strict_end for the old behaviour.
+    - Fix marked sections:
+        - Recognise TEMP as a status keyword and close a section whose
+          keywords are all unrecognised, instead of leaving the ]]> in
+          the document text.
+        - Stop reporting a zero-length text event at the ]]> of an
+          INCLUDE section.
+        - Clear marked section state at EOF, so that a later document is
+          no longer parsed as if the section were still open.
+    - Clear the eof flag when a handler stops the parse from inside
+      eof(), so that the next document parsed by the same object is no
+      longer discarded.
     - Avoid a crash when a handler called during eof() drops the last
-      reference to the parser. parse() has been guarded against this
-      since 3.73, but eof() runs handlers too and was not.
-    - Take only the character encoding from a <meta> inside a title that
-      is never closed. Such a <meta> is the title's text rather than an
-      element, so it no longer sets an X-Meta-Keywords, a Refresh or a
-      Set-Cookie header. The encoding is still recovered, as browsers do,
-      by prescanning the leading bytes.
+      reference to the parser.
+    - Recover only the character encoding from a <meta> inside a title
+      that is never closed, and set no other header from it. See
+      ENCODING DECLARATIONS in HTML::HeadParser.
 
 3.85      2026-05-19
     - Replace deprecated uvuni_to_utf8() with uvchr_to_utf8() (GH#50)
