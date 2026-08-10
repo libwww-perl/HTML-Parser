@@ -109,6 +109,7 @@ struct p_state {
     bool empty_element_tags;
     bool xml_pic;
     bool backquote;
+    bool strict_boolean_attributes;
 
     /* other configuration stuff */
     SV* bool_attr_val;

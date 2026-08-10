@@ -1,6 +1,11 @@
 Change history for HTML-Parser
 
 {{$NEXT}}
+    - Add strict_boolean_attributes option (off by default) that emits undef
+      for value-less attributes not listed as boolean by the HTML Living
+      Standard, instead of falling back to the attribute name. Existing
+      behaviour is preserved when the option is disabled (GH#17, GH#36)
+      (Olaf Alders)
 
 3.85      2026-05-19
     - Replace deprecated uvuni_to_utf8() with uvchr_to_utf8() (GH#50)
