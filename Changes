@@ -34,6 +34,9 @@ Change history for HTML-Parser
     - Recover only the character encoding from a <meta> inside a title
       that is never closed, and set no other header from it. See
       ENCODING DECLARATIONS in HTML::HeadParser.
+    - Copy the open literal element's name when cloning a parser across
+      ithreads, so that a clone made while such an element is open no
+      longer reports its implicit end with an empty name.
 
 3.85      2026-05-19
     - Replace deprecated uvuni_to_utf8() with uvchr_to_utf8() (GH#50)

@@ -144,6 +144,8 @@ dup_pstate(pTHX_ PSTATE *pstate, CLONE_PARAMS *params)
     pstate2->eof = pstate->eof;
 
     pstate2->literal_mode = pstate->literal_mode;
+    Copy(pstate->literal_mode_name, pstate2->literal_mode_name,
+	 sizeof(pstate->literal_mode_name), char);
     pstate2->is_cdata = pstate->is_cdata;
     pstate2->no_dash_dash_comment_end = pstate->no_dash_dash_comment_end;
     pstate2->pending_end_tag = pstate->pending_end_tag;
