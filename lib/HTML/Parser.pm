@@ -393,6 +393,15 @@ honoured.
 There are currently no events associated with the marked section
 markup, but the text can be returned as C<skipped_text>.
 
+The recognised status keywords are INCLUDE, RCDATA, CDATA, IGNORE and
+TEMP.  Where a section carries more than one keyword the most
+restrictive applies, so <![INCLUDE CDATA[...]]> is handled as CDATA.
+
+A section with no keywords, written as <![[...]]>, is handled as
+INCLUDE, and so is a section whose keywords are all unrecognised.  In
+SGML an unknown status keyword is an error, but C<HTML::Parser> has no
+way to report one, so it accepts the section instead.
+
 =item $p->strict_comment
 
 =item $p->strict_comment( $bool )
@@ -422,6 +431,10 @@ manner that emulates MSIE's behaviour.
 
 The official behaviour is enabled with this attribute.  If enabled,
 only whitespace is allowed between the tagname and the final ">".
+
+This also governs the end tag of a literal element.  By default
+C<< </script foo=bar> >> closes the C<script> element, as browsers
+close it.  With C<strict_end> enabled it is part of the script text.
 
 =item $p->strict_names
 
@@ -908,6 +921,15 @@ This event is triggered when an end tag is recognized.
 Example:
 
   </A>
+
+The content of the literal elements (C<script>, C<style>, C<xmp>,
+C<iframe>, C<title>, C<textarea> and C<plaintext>) is not parsed as
+markup, so the only tag recognized there is the element's own end tag.
+If the document ends while such an element is open, the remaining
+content is reported as the element's text, followed by an implicit
+C<end> event.  C<plaintext> is the exception, as it has no end tag.
+When C<case_sensitive> is enabled the implicit end reports the tag
+name as written in the start tag.
 
 =item C<end_document>
 

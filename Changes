@@ -1,6 +1,42 @@
 Change history for HTML-Parser
 
 {{$NEXT}}
+    - Report the remaining bytes of an unclosed literal element (script,
+      style, title, xmp, iframe, textarea) at the end of a document as
+      the element's raw text, as browsers do, instead of re-parsing them
+      as markup. Previously a close tag broken by an embedded NUL, or a
+      plainly unclosed element, could expose the following tags as
+      elements.
+    - Fix the implicit end event of an unclosed literal element. Report
+      it after the element's text, for xmp, iframe and textarea too
+      (plaintext has no end tag and gets none), with the start tag's
+      name as written under case_sensitive, and not at all inside an
+      element that ignore_elements is skipping.
+    - Close a literal element at an end tag that carries attributes or a
+      slash, for example </script foo=bar>, as browsers do. Enable
+      strict_end for the old behaviour.
+    - Fix marked sections:
+        - Recognise TEMP as a status keyword and close a section whose
+          keywords are all unrecognised, instead of leaving the ]]> in
+          the document text.
+        - Stop reporting a zero-length text event at the ]]> of an
+          INCLUDE section.
+        - Clear marked section state at EOF, so that a later document is
+          no longer parsed as if the section were still open.
+    - Clear the eof flag when a handler stops the parse from inside
+      eof(), so that the next document parsed by the same object is no
+      longer discarded.
+    - Reset the relaxed comment-end state at end of document, so that a
+      document with unterminated markup no longer changes how comments
+      in a later document parsed by the same object are terminated.
+    - Avoid a crash when a handler called during eof() drops the last
+      reference to the parser.
+    - Recover only the character encoding from a <meta> inside a title
+      that is never closed, and set no other header from it. See
+      ENCODING DECLARATIONS in HTML::HeadParser.
+    - Copy the open literal element's name when cloning a parser across
+      ithreads, so that a clone made while such an element is open no
+      longer reports its implicit end with an empty name.
 
 3.85      2026-05-19
     - Replace deprecated uvuni_to_utf8() with uvchr_to_utf8() (GH#50)
