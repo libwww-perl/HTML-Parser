@@ -1412,8 +1412,16 @@ parse_start(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 			if (!--len) {
 			    /* found it */
 			    p_state->literal_mode = literal_mode_elem[i].str;
+			    /* tag_len equals this element's name length, so it
+			     * always fits; guard at runtime too, in case a
+			     * longer literal element name is ever added, so a
+			     * release build (NDEBUG drops the assert) cannot
+			     * overflow the fixed buffer. */
 			    assert(tag_len <
 				   (int)sizeof(p_state->literal_mode_name));
+			    if (tag_len >=
+				(int)sizeof(p_state->literal_mode_name))
+				croak("literal element name too long");
 			    Copy(tokens[0].beg, p_state->literal_mode_name,
 				 tag_len, char);
 			    p_state->literal_mode_name[tag_len] = '\0';
