@@ -90,6 +90,10 @@ taken this way.  A E<lt>meta> that never became an element sets no
 other header, so a truncated document cannot introduce a header such
 as C<Set-Cookie>.
 
+The scan runs on the text of every title, not only one left unclosed;
+a closed title rarely holds a E<lt>meta>, so in practice it recovers
+the encoding from the unclosed case.
+
 This scan stops short of the browser prescan.  A declaration inside
 an unclosed C<script> or C<style> is not recovered, because those
 elements are ignored wholesale.
