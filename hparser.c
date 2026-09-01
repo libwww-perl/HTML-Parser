@@ -1814,7 +1814,7 @@ parse(pTHX_
 			     * is_cdata on even for title, and the ]]> below is
 			     * closed by the nesting-aware parse_buf, so the
 			     * deferred-end path report_literal_end takes for a
-			     * cdata element must not run here. */
+			     * non-cdata element must not run here. */
 			    report_synthetic_end(p_state,
 						 p_state->literal_mode_name,
 						 self);
