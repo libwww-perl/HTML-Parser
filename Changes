@@ -26,6 +26,9 @@ Change history for HTML-Parser
     - Clear the eof flag when a handler stops the parse from inside
       eof(), so that the next document parsed by the same object is no
       longer discarded.
+    - Reset the relaxed comment-end state at end of document, so that a
+      document with unterminated markup no longer changes how comments
+      in a later document parsed by the same object are terminated.
     - Avoid a crash when a handler called during eof() drops the last
       reference to the parser.
     - Recover only the character encoding from a <meta> inside a title

@@ -1875,6 +1875,7 @@ parse(pTHX_
 	p_state->literal_mode = 0;
 	p_state->is_cdata = 0;
 	p_state->pending_end_tag = 0;
+	p_state->no_dash_dash_comment_end = 0;
 #ifdef MARKED_SECTION
 	if (p_state->ms_stack)
 	    av_clear(p_state->ms_stack);
