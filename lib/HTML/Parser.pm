@@ -413,6 +413,35 @@ comments:
   <! comment>
 
 
+=item $p->strict_boolean_attributes
+
+=item $p->strict_boolean_attributes( $bool )
+
+By default, an attribute that appears in a start tag without a value is
+reported with the attribute's own name as its value (or with the value set
+by L</boolean_attribute_value>, if one has been configured). For example,
+C<< <input foo> >> is reported as C<< foo => "foo" >>. This historic
+behaviour predates HTML5 and applies uniformly to every attribute.
+
+When this attribute is enabled, only attributes that are listed as
+"boolean" by the HTML Living Standard (such as C<checked>, C<disabled>,
+C<selected>, C<defer>, C<inert>, etc.) are reported with their name as the
+value. Any other value-less attribute is reported with C<undef>:
+
+  $p->strict_boolean_attributes(1);
+  # <input checked foo>  now yields  { checked => "checked", foo => undef }
+
+The L</boolean_attribute_value> override still applies to recognized
+boolean attributes; non-boolean value-less attributes always become
+C<undef> regardless of that setting.
+
+This affects the values reported for both the C<attr> and C<tokens>
+argspecs. It does not affect attribute names or the C<attrseq> argspec.
+
+The match against the spec list is ASCII case-insensitive, so
+C<< <input CHECKED> >> is still recognized as a boolean attribute.
+
+
 =item $p->strict_end
 
 =item $p->strict_end( $bool )
@@ -642,9 +671,11 @@ identifier names can be used:
 Attr causes a reference to a hash of attribute name/value pairs to be
 passed.
 
-Boolean attributes' values are either the value set by
-$p->boolean_attribute_value, or the attribute name if no value has been
-set by $p->boolean_attribute_value.
+By default an attribute that appears without a value is reported with the
+attribute's own name as the value (or with the value set by
+$p->boolean_attribute_value, if configured). With L</strict_boolean_attributes>
+enabled, only attributes listed as "boolean" by the HTML Living Standard
+behave that way; any other value-less attribute is reported as C<undef>.
 
 This passes undef except for C<start> events.
 
@@ -825,10 +856,12 @@ For C<comment> events, this contains each sub-comment.  If
 $p->strict_comments is disabled, there will be only one sub-comment.
 
 For C<start> events, this contains the original tag name followed by
-the attribute name/value pairs.  The values of boolean attributes will
-be either the value set by $p->boolean_attribute_value, or the
-attribute name if no value has been set by
-$p->boolean_attribute_value.
+the attribute name/value pairs.  By default the value reported for an
+attribute that appeared without a value is either the value set by
+$p->boolean_attribute_value, or the attribute name itself if no value
+has been set.  With L</strict_boolean_attributes> enabled, only
+attributes listed as "boolean" by the HTML Living Standard get that
+treatment; any other value-less attribute is reported as C<undef>.
 
 For C<end> events, this contains the original tag name (always one token).
 
