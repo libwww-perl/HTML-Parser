@@ -175,7 +175,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool expand_prefix)
 	    if (ent_name != s && entity2char) {
 		SV** svp;
 		if (              (svp = hv_fetch(entity2char, ent_name, s - ent_name, 0)) ||
-		    (*s == ';' && (svp = hv_fetch(entity2char, ent_name, s - ent_name + 1, 0)))
+		    (s < end && *s == ';' && (svp = hv_fetch(entity2char, ent_name, s - ent_name + 1, 0)))
 		   )
 		{
 		    char *src = SvPV(*svp, repl_len);
@@ -224,7 +224,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool expand_prefix)
 		s++;
 	    t--;  /* '&' already copied, undo it */
 
-	    if (*s != '&') {
+	    if (s >= end || *s != '&') {
 		high_surrogate = 0;
 	    }
 
