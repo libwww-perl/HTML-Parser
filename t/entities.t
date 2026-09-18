@@ -4,7 +4,7 @@ use utf8;
 
 use HTML::Entities
     qw(_decode_entities decode_entities encode_entities encode_entities_numeric);
-use Test::More tests => 32;
+use Test::More tests => 33;
 
 my $x = "V&aring;re norske tegn b&oslash;r &#230res";
 
@@ -110,6 +110,22 @@ is($x, $ent);
     _decode_entities($h{foo}, \%h);
     is($h{foo}, ("A" x 64) . "&foo;" . ("B" x 16384),
         "_decode_entities() with self-aliased entity hash value");
+}
+
+# An entity name that runs to the end of the input must not match a
+# "name;" key on a byte beyond the end.  Growing the string moves the
+# tail without its NUL, so that byte holds whatever the buffer held
+# before.  Trim the string in place so a ";" is left just past its end.
+{
+    my %t = ("ab;" => "X" x 40, "a;" => "Y");
+    my $s = "&ab;&a" . (";" x 200);
+    substr($s, 6) = "";
+    _decode_entities($s, \%t);
+    is(
+        $s,
+        ("X" x 40) . "&a",
+        "_decode_entities() does not read past the end of the input"
+    );
 }
 
 # From: Bill Simpson-Young <bill.simpson-young@cmis.csiro.au>
