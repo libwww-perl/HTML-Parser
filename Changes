@@ -2,7 +2,7 @@ Change history for HTML-Parser
 
 {{$NEXT}}
     - Expand an entity whose value is the string being decoded to the
-      value that string had when the call began (GH#68)
+      value that string had when the call began (GH#69) (Paul Johnson)
 
 3.85      2026-05-19
     - Replace deprecated uvuni_to_utf8() with uvchr_to_utf8() (GH#50)
