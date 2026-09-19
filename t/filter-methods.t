@@ -3,7 +3,7 @@ use warnings;
 use utf8;
 
 use HTML::Parser ();
-use Test::More tests => 12;
+use Test::More tests => 16;
 
 my $p = HTML::Parser->new(api_version => 3, ignore_tags => [qw(b i em tt)],);
 $p->ignore_elements("script");
@@ -214,3 +214,29 @@ $p->parse(<<'EOT')->eof;
 A <script> B </script> C </script> D <script> E </script> F
 EOT
 is($res, "A  C  D  F\n", "ignore </script> without <script> correctly");
+
+#------------------------------------------------------
+
+for my $el (qw( title script style )) {
+    $p = HTML::Parser->new(api_version => 3);
+    $p->ignore_elements("p");
+    my @events;
+    $p->handler(default => sub { push @events, $_[0] }, "event");
+    $p->parse("<p><$el>x")->eof;
+    is(join("|", grep !/_document/, @events),
+        "", "no implicit end leaks from an unclosed $el in an ignored element");
+}
+
+{
+    $p = HTML::Parser->new(api_version => 3);
+    my @events;
+    $p->handler(start => sub { push @events, "start=$_[0]" }, "tagname");
+    $p->handler(text  => sub { push @events, "text=$_[0]" },  "text");
+    $p->handler(end   => sub { push @events, "end=$_[0]" },   "tagname");
+    $p->parse("<title>x")->eof;
+    is(
+        join("|", @events),
+        "start=title|text=x|end=title",
+        "unfiltered title keeps text before its implicit end"
+    );
+}

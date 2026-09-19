@@ -93,6 +93,7 @@ static const char * const argname[] = {
          ((p_state)->xml_mode || (p_state)->empty_element_tags)
 
 static void flush_pending_text(PSTATE* p_state, SV* self);
+static void report_synthetic_end(PSTATE* p_state, char *name, SV* self);
 
 /*
  * Parser functions.
@@ -182,12 +183,9 @@ report_event(PSTATE* p_state,
 #endif
 
     if (p_state->pending_end_tag && event != E_TEXT && event != E_COMMENT) {
-	token_pos_t t;
-	char dummy;
-	t.beg = p_state->pending_end_tag;
-	t.end = p_state->pending_end_tag + strlen(p_state->pending_end_tag);
+	char *name = p_state->pending_end_tag;
 	p_state->pending_end_tag = 0;
-	report_event(p_state, E_END, &dummy, &dummy, 0, &t, 1, self);
+	report_synthetic_end(p_state, name, self);
 	SPAGAIN;
     }
 
@@ -656,6 +654,17 @@ IGNORE_EVENT:
 }
 
 
+static void
+report_synthetic_end(PSTATE* p_state, char *name, SV* self)
+{
+    token_pos_t t;
+    char dummy;
+    t.beg = name;
+    t.end = name + strlen(name);
+    report_event(p_state, E_END, &dummy, &dummy, 0, &t, 1, self);
+}
+
+
 EXTERN SV*
 argspec_compile(SV* src, PSTATE* p_state)
 {
@@ -968,7 +977,8 @@ marked_section_update(PSTATE* p_state)
 			STRLEN len;
 			char *token_str = SvPV(*svp, len);
 			enum marked_section_t token;
-			if (strEQ(token_str, "include"))
+			if (strEQ(token_str, "include") ||
+			    strEQ(token_str, "temp"))
 			    token = MS_INCLUDE;
 			else if (strEQ(token_str, "rcdata"))
 			    token = MS_RCDATA;
@@ -984,6 +994,10 @@ marked_section_update(PSTATE* p_state)
 		}
 	    }
 	}
+	/* Treat unrecognised keywords as INCLUDE in the same way that
+	 * <![[ does. */
+	if (p_state->ms == MS_NONE && av_len(ms_stack) >= 0)
+	    p_state->ms = MS_INCLUDE;
     }
     /* printf("MS %d\n", p_state->ms); */
     p_state->is_cdata = (p_state->ms == MS_CDATA);
@@ -1398,6 +1412,19 @@ parse_start(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 			if (!--len) {
 			    /* found it */
 			    p_state->literal_mode = literal_mode_elem[i].str;
+			    /* tag_len equals this element's name length, so it
+			     * always fits; guard at runtime too, in case a
+			     * longer literal element name is ever added, so a
+			     * release build (NDEBUG drops the assert) cannot
+			     * overflow the fixed buffer. */
+			    assert(tag_len <
+				   (int)sizeof(p_state->literal_mode_name));
+			    if (tag_len >=
+				(int)sizeof(p_state->literal_mode_name))
+				croak("literal element name too long");
+			    Copy(tokens[0].beg, p_state->literal_mode_name,
+				 tag_len, char);
+			    p_state->literal_mode_name[tag_len] = '\0';
 			    p_state->is_cdata = literal_mode_elem[i].is_cdata;
 			    /* printf("Found %s\n", p_state->literal_mode); */
 			    goto END_OF_LITERAL_SEARCH;
@@ -1524,6 +1551,20 @@ parse_null(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 #include "pfunc.h"                   /* declares the parsefunc[] */
 #endif /* USE_PFUNC */
 
+static void
+report_literal_end(PSTATE* p_state, SV* self)
+{
+    if (p_state->is_cdata) {
+	/* effectively make it an empty element */
+	report_synthetic_end(p_state, p_state->literal_mode_name, self);
+    }
+    else {
+	p_state->pending_end_tag = p_state->literal_mode_name;
+    }
+    p_state->literal_mode = 0;
+    p_state->is_cdata = 0;
+}
+
 static char*
 parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 {
@@ -1565,13 +1606,21 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 		if (!*l && (strNE(p_state->literal_mode, "plaintext") || p_state->closing_plaintext)) {
 		    /* matched it all */
 		    token_pos_t end_token;
+		    char *gt = end;
 		    end_token.beg = end_text + 2;
 		    end_token.end = s;
 
-		    while (isHSPACE(*s))
-			s++;
-		    if (*s == '>') {
-			s++;
+		    if (p_state->strict_end) {
+			while (isHSPACE(*s))
+			    s++;
+			if (*s == '>')
+			    gt = s;
+		    }
+		    else if (isHSPACE(*s) || *s == '>' || *s == '/') {
+			gt = skip_until_gt(s, end);
+		    }
+		    if (gt < end) {
+			s = gt + 1;
 			if (t != end_text)
 			    report_event(p_state, E_TEXT, t, end_text, utf8,
 					 0, 0, self);
@@ -1622,8 +1671,9 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 		    s++;
 		    if (*s == '>') {
 			s++;
-			report_event(p_state, E_TEXT, t, end_text, utf8,
-				     0, 0, self);
+			if (t != end_text)
+			    report_event(p_state, E_TEXT, t, end_text, utf8,
+					 0, 0, self);
 			report_event(p_state, E_NONE, end_text, s, utf8,
 				     0, 0, self);
 			t = s;
@@ -1723,7 +1773,7 @@ parse(pTHX_
 	/* eof */
 	char empty[1];
 	if (p_state->buf && SvOK(p_state->buf)) {
-	    /* flush it */
+	    /* flush s..end, the buffered text not yet parsed */
 	    s = SvPV(p_state->buf, len);
 	    end = s + len;
 	    utf8 = SvUTF8(p_state->buf);
@@ -1739,22 +1789,43 @@ parse(pTHX_
 			/* rest is considered text */
 			break;
                     }
-		    if (strEQ(p_state->literal_mode, "script") ||
-			strEQ(p_state->literal_mode, "style"))
-		    {
-			/* effectively make it an empty element */
-			token_pos_t t;
-			char dummy;
-			t.beg = p_state->literal_mode;
-			t.end = p_state->literal_mode + strlen(p_state->literal_mode);
-			report_event(p_state, E_END, &dummy, &dummy, 0, &t, 1, self);
+		    /* Unclosed script/style/title at end of document.  A browser
+		     * keeps the remaining bytes as the element's raw text and
+		     * closes it implicitly.  It does not re-parse them looking
+		     * for markup.  Re-parsing here would expose tags that follow a
+		     * close tag broken by (e.g.) an embedded NUL, diverging from
+		     * every browser. */
+#ifdef MARKED_SECTION
+		    /* Only a marked section terminator in these bytes is
+		     * structure rather than literal text, so seek it instead
+		     * of re-parsing the remainder for markup. */
+		    if (p_state->ms_stack && av_len(p_state->ms_stack) >= 0) {
+			char *t = s;
+			while (t + 3 <= end &&
+			       !(t[0] == ']' && t[1] == ']' && t[2] == '>'))
+			    t++;
+			if (t + 3 <= end) {
+			    /* the implicit end follows the element's text */
+			    if (t != s)
+				report_event(p_state, E_TEXT, s, t, utf8,
+					     0, 0, self);
+			    /* Report the end directly rather than via
+			     * report_literal_end: a marked section can force
+			     * is_cdata on even for title, and the ]]> below is
+			     * closed by the nesting-aware parse_buf, so the
+			     * deferred-end path report_literal_end takes for a
+			     * non-cdata element must not run here. */
+			    report_synthetic_end(p_state,
+						 p_state->literal_mode_name,
+						 self);
+			    p_state->literal_mode = 0;
+			    p_state->is_cdata = 0;
+			    s = parse_buf(aTHX_ p_state, t, end, utf8, self);
+			    continue;
+			}
 		    }
-		    else {
-			p_state->pending_end_tag = p_state->literal_mode;
-		    }
-		    p_state->literal_mode = 0;
-		    s = parse_buf(aTHX_ p_state, s, end, utf8, self);
-		    continue;
+#endif
+		    break;
 		}
 
 		if (!p_state->strict_comment && !p_state->no_dash_dash_comment_end && *s == '<') {
@@ -1786,8 +1857,21 @@ parse(pTHX_
 	    SvREFCNT_dec(p_state->buf);
 	    p_state->buf = 0;
 	}
+	if (p_state->literal_mode &&
+	    strNE(p_state->literal_mode, "plaintext"))
+	{
+	    /* the unclosed element still ends, even with nothing buffered */
+	    report_literal_end(p_state, self);
+	}
 	if (p_state->pend_text && SvOK(p_state->pend_text))
 	    flush_pending_text(p_state, self);
+
+	if (p_state->pending_end_tag) {
+	    /* flush while the ignore state below still applies */
+	    char *name = p_state->pending_end_tag;
+	    p_state->pending_end_tag = 0;
+	    report_synthetic_end(p_state, name, self);
+	}
 
 	if (p_state->ignoring_element) {
 	    /* document not balanced */
@@ -1804,6 +1888,13 @@ parse(pTHX_
 	p_state->start_document = 0;
 	p_state->literal_mode = 0;
 	p_state->is_cdata = 0;
+	p_state->pending_end_tag = 0;
+	p_state->no_dash_dash_comment_end = 0;
+#ifdef MARKED_SECTION
+	if (p_state->ms_stack)
+	    av_clear(p_state->ms_stack);
+	marked_section_update(p_state);
+#endif
 	return;
     }
 

@@ -3,7 +3,7 @@ use warnings;
 use utf8;
 
 use HTML::HeadParser ();
-use Test::More tests => 17;
+use Test::More tests => 31;
 
 {
 
@@ -209,4 +209,86 @@ EOT
     is($p->header("title"),
         "ko\xC5\x84c\xC3\xB3wki kolekcji, outlet, hurtownia odzie\xC5\xBCy Warszawa \xE2\x80\x93 MJW"
     );
+}
+
+# An unclosed title swallows the rest of the head as its own text, so the
+# encoding declaration never arrives as an element. Browsers still find it,
+# because they prescan the leading bytes without tracking element context.
+
+$p = HTML::HeadParser->new(H->new);
+$p->parse(q{<title>Doc<meta charset="utf-8">});
+$p->eof;
+is($p->header("X-Meta-Charset"), "utf-8", "charset found in an unclosed title");
+
+$p = HTML::HeadParser->new(H->new);
+$p->parse(q{<title>Doc<meta http-equiv="Content-Type" }
+        . q{content="text/html; charset=utf-8">});
+$p->eof;
+is(
+    $p->header("Content-Type"),
+    "text/html; charset=utf-8",
+    "http-equiv found in an unclosed title"
+);
+
+$p = HTML::HeadParser->new(H->new);
+$p->parse(q{<title>Doc<meta charset="utf-8">});
+$p->eof;
+is(
+    $p->header("Title"),
+    q{Doc<meta charset="utf-8">},
+    "the title still keeps the swallowed markup as its text"
+);
+
+# The prescan takes the encoding and nothing else, as browsers do. A meta
+# that never became an element must not set any other header.
+
+for my $case (
+    [q{<meta http-equiv="Set-Cookie" content="sid=evil">},     "Set-Cookie"],
+    [q{<meta http-equiv="Refresh" content="0;url=http://x/">}, "Refresh"],
+    [q{<meta name="Keywords" content="a,b">}, "X-Meta-Keywords"],
+    )
+{
+    my ($meta, $header) = @$case;
+    $p = HTML::HeadParser->new(H->new);
+    $p->parse("<title>Doc$meta");
+    $p->eof;
+    ok(!$p->header($header), "an unclosed title sets no $header");
+}
+
+# A meta admitted to the scan by its charset attribute must still set
+# only the encoding. Its other attributes must not name a header.
+
+for my $case (
+    [
+        q{<meta charset="utf-8" http-equiv="Set-Cookie" content="sid=evil">},
+        "Set-Cookie"
+    ],
+    [
+        q{<meta charset="utf-8" http-equiv="Refresh" content="0;url=http://x/">},
+        "Refresh"
+    ],
+    [
+        q{<meta charset="utf-8" name="Keywords" content="a,b">},
+        "X-Meta-Keywords"
+    ],
+    )
+{
+    my ($meta, $header) = @$case;
+    $p = HTML::HeadParser->new(H->new);
+    $p->parse("<title>Doc$meta");
+    $p->eof;
+    ok(!$p->header($header), "an admitted meta sets no $header");
+    is($p->header("X-Meta-Charset"), "utf-8", "its charset is still taken");
+}
+
+# The scan reads only a title's text, unlike the browser prescan, which
+# reads the leading bytes regardless of element. A declaration inside an
+# unclosed script or style is not recovered, as both are ignored
+# wholesale.
+
+for my $el (qw( script style )) {
+    $p = HTML::HeadParser->new(H->new);
+    $p->parse(qq{<$el>x<meta charset="utf-8">});
+    $p->eof;
+    ok(!$p->header("X-Meta-Charset"), "no charset from an unclosed $el");
 }

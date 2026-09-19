@@ -3,7 +3,7 @@ use warnings;
 use utf8;
 
 use HTML::Parser ();
-use Test::More tests => 14;
+use Test::More tests => 20;
 
 my $tag;
 my $text;
@@ -25,7 +25,7 @@ my $error;
 }
 
 SKIP: {
-    skip $error, 14 if $error;
+    skip $error, 20 if $error;
 
     $p->parse("<![[foo]]>");
     is($text, "foo");
@@ -128,5 +128,30 @@ EOT
 
     $p->parse("<![CDATA[foo [1]]]>");
     is($text, "foo [1]", "CDATA text ending in square bracket");
+
+    $text = "";
+    $p->parse("<![TEMP[foo]]>bar")->eof;
+    is($text, "foobar", "TEMP alone terminates the marked section");
+
+    $text = "";
+    $p->parse("<![FOO[foo]]>bar")->eof;
+    is($text, "foobar", "unrecognised status keyword terminates the section");
+
+    for my $section ("<![INCLUDE[]]>", "<![[]]>", "<![FOO[]]>") {
+        my @events;
+        HTML::Parser->new(
+            text_h          => [sub { push @events, shift }, "text"],
+            marked_sections => 1,
+        )->parse("x${section}y")->eof;
+        is(join("|", @events), "x|y", "no empty text event for $section");
+    }
+
+    my @events;
+    HTML::Parser->new(
+        text_h          => [sub { push @events, shift }, "text"],
+        marked_sections => 1,
+    )->parse("x<![INCLUDE[<br>]]>y")->eof;
+    is(join("|", @events),
+        "x|y", "no empty text event when the terminator follows a tag");
 
 }    # SKIP

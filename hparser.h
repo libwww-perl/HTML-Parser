@@ -75,6 +75,7 @@ struct p_state {
 
     /* special parsing modes */
     char* literal_mode;
+    char  literal_mode_name[10];  /* the start tag's name as written */
     bool  is_cdata;
     bool  no_dash_dash_comment_end;
     char *pending_end_tag;

@@ -73,6 +73,31 @@ before forming the field name.
 
 =back
 
+=head1 ENCODING DECLARATIONS
+
+A title that is never closed swallows the rest of the head as its own
+text, so any E<lt>meta> that follows it is text rather than an element
+and sets no header.  Browsers behave the same way when building the
+document, but they still find the encoding, because they prescan the
+leading bytes for a charset declaration without tracking which element
+those bytes fall inside.
+
+C<HTML::HeadParser> recovers the encoding from a title's text only.
+The text is scanned for a E<lt>meta> carrying a C<charset> attribute,
+or an C<http-equiv> of C<Content-Type>, and such a declaration sets
+its header as it would have done as an element.  Only the encoding is
+taken this way.  A E<lt>meta> that never became an element sets no
+other header, so a truncated document cannot introduce a header such
+as C<Set-Cookie>.
+
+The scan runs on the text of every title, not only one left unclosed;
+a closed title rarely holds a E<lt>meta>, so in practice it recovers
+the encoding from the unclosed case.
+
+This scan stops short of the browser prescan.  A declaration inside
+an unclosed C<script> or C<style> is not recovered, because those
+elements are ignored wholesale.
+
 =head1 METHODS
 
 The following methods (in addition to those provided by the
@@ -151,6 +176,56 @@ sub as_string    # legacy
     $self->{'header'}->as_string;
 }
 
+sub meta_header    # internal
+{
+    my ($self, $attr) = @_;
+    my $key = $attr->{'http-equiv'};
+    if (!defined($key) || !length($key)) {
+        if ($attr->{name}) {
+            $key = "X-Meta-\u$attr->{name}";
+        }
+        elsif ($attr->{charset}) {    # HTML 5 <meta charset="...">
+            $self->{header}->push_header("X-Meta-Charset" => $attr->{charset});
+            return;
+        }
+        else {
+            return;
+        }
+    }
+    $key =~ s/:/-/g;
+    $self->{'header'}->push_header($key => $attr->{content});
+}
+
+sub prescan_meta    # internal
+{
+    my ($self, $text) = @_;
+    return unless $text =~ /<meta\b/i;
+    my $scan = HTML::Parser->new(
+        api_version => 3,
+        start_h     => [
+            sub {
+                my ($tag, $attr) = @_;
+                return if $tag ne 'meta';
+                my $equiv = $attr->{'http-equiv'};
+                if (   defined($equiv)
+                    && lc($equiv) eq 'content-type'
+                    && defined($attr->{content}))
+                {
+                    $self->{header}
+                        ->push_header("Content-Type" => $attr->{content});
+                }
+                elsif (defined $attr->{charset}) {
+                    $self->{header}
+                        ->push_header("X-Meta-Charset" => $attr->{charset});
+                }
+            },
+            "tagname, attr"
+        ],
+    );
+    $scan->parse($text);
+    $scan->eof;
+}
+
 sub flush_text   # internal
 {
     my $self = shift;
@@ -161,6 +236,7 @@ sub flush_text   # internal
     $text =~ s/\s+/ /g;
     print "FLUSH $tag => '$text'\n"  if $DEBUG;
     if ($tag eq 'title') {
+	$self->prescan_meta($text);
 	my $decoded;
 	$decoded = utf8::decode($text) if $self->utf8_mode && defined &utf8::decode;
 	HTML::Entities::decode($text);
@@ -196,20 +272,7 @@ sub start
     print "START[$tag]\n" if $DEBUG;
     $self->flush_text if $self->{'tag'};
     if ($tag eq 'meta') {
-	my $key = $attr->{'http-equiv'};
-	if (!defined($key) || !length($key)) {
-	    if ($attr->{name}) {
-		$key = "X-Meta-\u$attr->{name}";
-	    } elsif ($attr->{charset}) { # HTML 5 <meta charset="...">
-		$key = "X-Meta-Charset";
-		$self->{header}->push_header($key => $attr->{charset});
-		return;
-	    } else {
-		return;
-	    }
-	}
-	$key =~ s/:/-/g;
-	$self->{'header'}->push_header($key => $attr->{content});
+	$self->meta_header($attr);
     } elsif ($tag eq 'base') {
 	return unless exists $attr->{href};
 	(my $base = $attr->{href}) =~ s/^\s+//; $base =~ s/\s+$//; # HTML5
