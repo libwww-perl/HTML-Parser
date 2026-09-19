@@ -4,7 +4,7 @@ use utf8;
 
 use HTML::Entities
     qw(_decode_entities decode_entities encode_entities encode_entities_numeric);
-use Test::More tests => 42;
+use Test::More tests => 43;
 
 my $x = "V&aring;re norske tegn b&oslash;r &#230res";
 
@@ -192,6 +192,25 @@ is($x, $ent);
         $@,
         qr/modified while fetching an entity value/,
         "_decode_entities() dies when a tied table undefines the string"
+    );
+}
+{
+    package ReallocateOnFetch;
+    require Tie::Hash;
+    our @ISA = ("Tie::StdHash");
+    our $target;
+    sub FETCH { undef $$target; $$target = "Z" x 1000; undef }
+}
+{
+    my %tied;
+    tie %tied, "ReallocateOnFetch";
+    my $s = "&foo;" . ("a" x 100);
+    $ReallocateOnFetch::target = \$s;
+    eval { _decode_entities($s, \%tied) };
+    like(
+        $@,
+        qr/modified while fetching an entity value/,
+        "_decode_entities() dies when a tied table reallocates the string"
     );
 }
 {
