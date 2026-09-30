@@ -34,7 +34,7 @@ jobs:
           # - '5.14'
     steps:
       - name: Setup perl
-        uses: shogo82148/actions-setup-perl@v1.43.1
+        uses: shogo82148/actions-setup-perl@v1.44.0
         with:
           perl-version: ${{ matrix.perl-version }}
           distribution: strawberry
