@@ -1,6 +1,8 @@
 Change history for HTML-Parser
 
 {{$NEXT}}
+
+3.87      2026-11-18
     - Retain entity values across stringification callbacks (GH#72)
       (Yves Orton)
 
