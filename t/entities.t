@@ -199,6 +199,7 @@ is($x, $ent);
     require Tie::Hash;
     our @ISA = ("Tie::StdHash");
     our $target;
+    # Return a defined value so only the reallocation is under test (GH#73).
     sub FETCH { undef $$target; $$target = "Z" x 1000; "x" }
 }
 {
