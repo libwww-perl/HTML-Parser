@@ -199,7 +199,7 @@ is($x, $ent);
     require Tie::Hash;
     our @ISA = ("Tie::StdHash");
     our $target;
-    sub FETCH { undef $$target; $$target = "Z" x 1000; undef }
+    sub FETCH { undef $$target; $$target = "Z" x 1000; "x" }
 }
 {
     my %tied;
